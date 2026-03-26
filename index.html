@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TriggerBot - AFK Control Panel</title>
+    <style>
+        body { background: #050505; color: #00ff41; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .container { background: rgba(10, 10, 10, 0.9); padding: 40px; border: 1px solid #00ff41; border-radius: 5px; box-shadow: 0 0 20px #00ff4133; text-align: center; width: 320px; position: relative; }
+        .container::before { content: "SYSTEM_ACCESS"; position: absolute; top: -10px; left: 10px; background: #050505; padding: 0 5px; font-size: 12px; }
+        h2 { letter-spacing: 3px; margin-bottom: 30px; border-bottom: 1px solid #00ff41; padding-bottom: 10px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #00441b; color: #00ff41; border-radius: 3px; outline: none; box-sizing: border-box; }
+        input:focus { border-color: #00ff41; box-shadow: 0 0 5px #00ff41; }
+        button { width: 100%; padding: 15px; background: #00ff41; color: #000; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.3s; text-transform: uppercase; }
+        button:hover { background: #000; color: #00ff41; border: 1px solid #00ff41; }
+        #botPanel { display: none; }
+        .status { margin-top: 20px; font-size: 14px; min-height: 20px; }
+        .loading-bar { width: 0%; height: 2px; background: #00ff41; margin-top: 5px; transition: 0.5s; }
+    </style>
+</head>
+<body>
+
+    <div id="loginBox" class="container">
+        <h2>LOGIN</h2>
+        <input type="text" id="user" placeholder="USER_ID">
+        <input type="password" id="pass" placeholder="PASSWORD">
+        <button onclick="login()">Sisteme Sız</button>
+        <p class="status" id="loginMsg" style="color: red;"></p>
+    </div>
+
+    <div id="botPanel" class="container">
+        <h2>BOT_CONTROL</h2>
+        <input type="text" id="serverIp" placeholder="SERVER_IP (örn: play.mc.com)">
+        <input type="text" id="botName" placeholder="BOT_NICKNAME">
+        <button onclick="sendBot()">Sinyali Gönder</button>
+        <div class="loading-bar" id="lBar"></div>
+        <p class="status" id="botStatus">Durum: Bekleniyor...</p>
+    </div>
+
+<script>
+    // GİRİŞ BİLGİLERİ
+    function login() {
+        const user = document.getElementById('user').value;
+        const pass = document.getElementById('pass').value;
+
+        // Kullanıcı adı: admin | Şifre: trigger123
+        if(user === "admin" && pass === "trigger123") {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('botPanel').style.display = 'block';
+        } else {
+            document.getElementById('loginMsg').innerText = "ERİŞİM ENGELLENDİ!";
+        }
+    }
+
+    // BOT GÖNDERME FONKSİYONU
+    function sendBot() {
+        const ip = document.getElementById('serverIp').value;
+        const name = document.getElementById('botName').value;
+        const status = document.getElementById('botStatus');
+        const bar = document.getElementById('lBar');
+
+        if(!ip || !name) {
+            alert("Eksik veri girişi!");
+            return;
+        }
+
+        status.innerText = "Uzak sunucuya bağlanılıyor...";
+        status.style.color = "yellow";
+        bar.style.width = "50%";
+
+        // RENDER SUNUCUNA İSTEK ATAR
+        fetch(`https://botbasma.onrender.com/bot-gonder?ip=${ip}&isim=${name}`)
+        .then(response => response.text())
+        .then(data => {
+            status.innerText = "BAŞARILI: " + data;
+            status.style.color = "#00ff41";
+            bar.style.width = "100%";
+        })
+        .catch(err => {
+            status.innerText = "HATA: Render sunucusu kapalı veya uyanıyor!";
+            status.style.color = "red";
+            bar.style.width = "0%";
+            console.error(err);
+        });
+    }
+</script>
+</body>
+</html>
