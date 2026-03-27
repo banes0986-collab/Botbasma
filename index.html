@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AFK Bot Panel</title>
+<style>
+body {
+    background: #0f172a;
+    color: white;
+    font-family: Arial;
+    text-align: center;
+}
+.container {
+    margin-top: 80px;
+}
+input {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+    border: none;
+    width: 200px;
+}
+button {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    background: #22c55e;
+    color: white;
+    cursor: pointer;
+}
+button:hover {
+    background: #16a34a;
+}
+.card {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 20px;
+    display: inline-block;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <div class="card">
+        <h2>🔐 Login</h2>
+        <input type="password" id="password" placeholder="Password"><br>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div class="card" id="panel" style="display:none;">
+        <h2>🤖 AFK Bot Panel</h2>
+        <input id="ip" placeholder="Server IP"><br>
+        <input id="name" placeholder="Bot Name"><br><br>
+
+        <button onclick="startBot()">Start Bot</button>
+        <button onclick="stopBot()">Stop Bot</button>
+
+        <p id="status"></p>
+    </div>
+</div>
+
+<script>
+function login() {
+    let pass = document.getElementById("password").value;
+
+    if (pass === "trigger123") {
+        document.getElementById("panel").style.display = "block";
+        document.querySelector(".card").style.display = "none";
+    } else {
+        alert("Wrong password!");
+    }
+}
+
+function startBot() {
+    let ip = document.getElementById("ip").value;
+    let name = document.getElementById("name").value;
+
+    fetch("/start", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ip, name })
+    });
+
+    document.getElementById("status").innerText = "Bot started!";
+}
+
+function stopBot() {
+    let name = document.getElementById("name").value;
+
+    fetch("/stop", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name })
+    });
+
+    document.getElementById("status").innerText = "Bot stopped!";
+}
+</script>
+
+</body>
+</html>
