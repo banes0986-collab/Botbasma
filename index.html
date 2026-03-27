@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TRİGGERBABA TPS CRUSHER</title>
+    <style>
+        body { background: #050505; color: #00ff00; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: #111; border: 2px solid #00ff00; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px #00ff00; width: 400px; text-align: center; }
+        h2 { text-shadow: 0 0 10px #00ff00; letter-spacing: 5px; }
+        input { background: #000; border: 1px solid #00ff00; color: #00ff00; padding: 10px; width: 90%; margin: 10px 0; outline: none; }
+        button { background: #00ff00; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        button:hover { background: #ff0000; color: #fff; box-shadow: 0 0 20px #ff0000; }
+        .tps-display { font-size: 30px; margin: 20px 0; color: #ff0000; }
+        #status { font-size: 12px; color: #888; margin-top: 15px; }
+        .dot { height: 10px; width: 10px; background-color: #bbb; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>TPS CRUSHER v3</h2>
+    <div id="lamba" class="dot"></div> <span id="sysText">SİSTEM BEKLENİYOR</span>
+    
+    <div class="tps-display">TPS: <span id="tps">20.00</span></div>
+    
+    <input type="text" id="ip" placeholder="Sunucu IP (play.vampircraft.xyz)">
+    <input type="text" id="bot" placeholder="Bot Nick (Örn: Gemini_X)">
+    
+    <button onclick="attack()">SALDIRIYI BAŞLAT</button>
+    <div id="status">Hazır...</div>
+</div>
+
+<script>
+    const RENDER_URL = "https://botbasma.onrender.com"; // KENDİ LİNKİNİ YAZ!
+
+    // Lamba ve Sistem Kontrolü
+    setInterval(() => {
+        fetch(`${RENDER_URL}/bot-zipla`).then(() => {
+            document.getElementById('lamba').style.background = '#00ff00';
+            document.getElementById('sysText').innerText = 'SİSTEM AKTİF';
+        }).catch(() => {
+            document.getElementById('lamba').style.background = 'red';
+        });
+    }, 4000);
+
+    function attack() {
+        const ip = document.getElementById('ip').value;
+        const bot = document.getElementById('bot').value;
+        document.getElementById('status').innerText = "Paketler gönderiliyor...";
+
+        fetch(`${RENDER_URL}/bot-gonder?ip=${ip}&isim=${bot}`);
+
+        // Gerçekçi TPS Düşüş Efekti (Video İçin)
+        let tpsVal = 20.00;
+        let down = setInterval(() => {
+            if(tpsVal > 13.50) {
+                tpsVal -= Math.random() * 0.4;
+                document.getElementById('tps').innerText = tpsVal.toFixed(2);
+            } else { clearInterval(down); }
+        }, 800)
+    }
+</script>
+
+</body>
+</html>
