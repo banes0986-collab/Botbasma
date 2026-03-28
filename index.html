@@ -1,35 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>MC Panel</title>
+<title>NEON MC PANEL</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<div class="bg"></div>
+
 <div class="container">
 
-<h1>⚡ Minecraft OP Panel</h1>
+<h1 class="title">⚡ NEON MC PANEL ⚡</h1>
 
-<input type="text" id="ip" placeholder="Server IP yaz...">
-<button onclick="check()">Check</button>
+<input id="ip" placeholder="Server IP yaz...">
+<button class="neon-btn" onclick="check()">CHECK</button>
 
 <div class="card" id="statusBox">
-<p>Status: -</p>
-<p>Players: -</p>
-<p>Ping: -</p>
+Status: -
 </div>
 
 <div class="card">
-<h2>🔥 VIP Sistem</h2>
-<button onclick="vip()">VIP Aktiv Et</button>
-<p id="vipStatus"></p>
+<h2>💎 VIP</h2>
+<button class="neon-btn" onclick="vip()">AKTİV ET</button>
+<p id="vip"></p>
 </div>
 
 <div class="card">
-<h2>⚡ Stress Test (Demo)</h2>
-<button onclick="stress()">Start</button>
-<p id="stressStatus"></p>
+<h2>⚡ BOT (DEMO)</h2>
+<button class="neon-btn" onclick="bot()">START</button>
+<p id="bot"></p>
 </div>
 
 </div>
