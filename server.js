@@ -9,18 +9,15 @@ app.get("/status", async (req, res) => {
 
     try {
         const result = await mc.status(ip, 25565);
-
         res.json({
             online: true,
             players: result.players.online,
             max: result.players.max,
-            ping: result.roundTripLatency,
-            motd: result.motd.clean
+            ping: result.roundTripLatency
         });
-
     } catch {
         res.json({ online: false });
     }
 });
 
-app.listen(3000, () => console.log("Panel işləyir 🔥"));
+app.listen(3000, () => console.log("⚡ Neon Panel Active"));
