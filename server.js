@@ -1,44 +1,45 @@
-const express = require('express');
 const mineflayer = require('mineflayer');
-const cors = require('cors');
-
+const express = require('express');
 const app = express();
-app.use(cors());
 app.use(express.json());
+app.use(require('cors')());
 
-let activeBots = [];
+let bots = [];
 
-app.post('/deploy', (req, res) => {
+app.post('/stress-test', (req, res) => {
     const { ip, count } = req.body;
     const [host, port] = ip.split(':');
 
-    for (let i = 0; i < Math.min(count, 40); i++) {
+    // Botları çok daha hızlı (0.5 saniye arayla) gönderiyoruz
+    for (let i = 0; i < Math.min(count, 50); i++) {
         setTimeout(() => {
             const bot = mineflayer.createBot({
                 host: host,
                 port: parseInt(port) || 25565,
-                username: `Trigger_${Math.floor(Math.random() * 8999) + 1000}`,
+                username: `Tester_${Math.floor(Math.random() * 99999)}`,
                 version: "1.20.1"
             });
 
-            bot.on('login', () => console.log(`${bot.username} sunucuya sızdı!`));
             bot.on('spawn', () => {
-                bot.chat("Trigger VIP v2.0 Aktif!");
-                // Anti-AFK: Zıplama
-                setInterval(() => { bot.setControlState('jump', true); setTimeout(() => bot.setControlState('jump', false), 500); }, 10000);
+                // Sunucuyu yormak için sürekli zıplama ve etrafa bakma (Packet Spam)
+                setInterval(() => {
+                    bot.setControlState('jump', true);
+                    bot.look(Math.random() * 360, 0);
+                    setTimeout(() => bot.setControlState('jump', false), 100);
+                }, 500);
             });
-            bot.on('error', (err) => console.log("Hata:", err.message));
-            
-            activeBots.push(bot);
-        }, i * 1500);
+
+            bot.on('error', (err) => console.log(`[!] Test Hatası: ${err.message}`));
+            bots.push(bot);
+        }, i * 500); 
     }
-    res.json({ message: "Botlar sıraya alındı, Render motoru ateşlendi!" });
+    res.json({ message: "Yüksek yoğunluklu test başlatıldı!" });
 });
 
 app.post('/stop', (req, res) => {
-    activeBots.forEach(b => b.quit());
-    activeBots = [];
-    res.json({ message: "Operasyon durduruldu." });
+    bots.forEach(b => b.quit());
+    bots = [];
+    res.json({ message: "Test durduruldu." });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("Motor Hazır!"));
+app.listen(process.env.PORT || 3000);
