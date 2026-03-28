@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>TriggerBot - AFK Panel</title>
+    <style>
+        body { background: #0a0a0a; color: #00ff00; font-family: 'Consolas', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: #111; padding: 30px; border: 2px solid #00ff00; border-radius: 10px; box-shadow: 0 0 20px #00ff0055; text-align: center; width: 350px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; background: #000; border: 1px solid #00ff00; color: #00ff00; border-radius: 5px; }
+        button { width: 100%; padding: 12px; background: #00ff00; color: #000; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #00cc00; box-shadow: 0 0 15px #00ff00; }
+        #botPanel { display: none; }
+        .status { color: #ff0000; font-size: 12px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginBox" class="box">
+        <h2>[ TRIGGER LOGIN ]</h2>
+        <input type="text" id="user" placeholder="Kullanıcı Adı">
+        <input type="password" id="pass" placeholder="Şifre">
+        <button onclick="login()">SİSTEME SIZ</button>
+        <p class="status" id="loginMsg"></p>
+    </div>
+
+    <div id="botPanel" class="box">
+        <h2>[ AFK BOT CONTROL ]</h2>
+        <input type="text" id="serverIp" placeholder="Sunucu IP (örn: play.sunucu.com)">
+        <input type="text" id="botName" placeholder="Bot İsmi">
+        <button onclick="sendBot()">BOTU GÖNDER</button>
+        <p style="color: cyan; margin-top: 15px;" id="botStatus">Durum: Bekleniyor...</p>
+    </div>
+
+<script>
+    // Basit Giriş Sistemi
+    function login() {
+        const user = document.getElementById('user').value;
+        const pass = document.getElementById('pass').value;
+
+        if(user === "admin" && pass === "trigger123") {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('botPanel').style.display = 'block';
+        } else {
+            document.getElementById('loginMsg').innerText = "ERİŞİM REDDEDİLDİ!";
+        }
+    }
+
+    // Bot Gönderme Simülasyonu
+    function sendBot() {
+        const ip = document.getElementById('serverIp').value;
+        const name = document.getElementById('botName').value;
+        const status = document.getElementById('botStatus');
+
+        if(ip === "" || name === "") {
+            alert("Lütfen tüm alanları doldur!");
+            return;
+        }
+
+        status.innerText = "Bağlanıyor...";
+        status.style.color = "yellow";
+
+        setTimeout(() => {
+            status.innerText = `BAŞARILI: ${name} ismiyle ${ip} adresine giriş yapıldı!`;
+            status.style.color = "#00ff00";
+        }, 2000);
+    }
+</script>
+</body>
+</html>
