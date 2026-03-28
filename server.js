@@ -2,33 +2,55 @@ const express = require('express');
 const mineflayer = require('mineflayer');
 const cors = require('cors');
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 app.use(cors());
 
-app.get('/bot-gonder', (req, res) => {
-    const { ip, isim } = req.query;
+let bot = null;
 
-    if (!ip || !isim) {
-        return res.status(400).send("Hata: Veriler eksik.");
+app.get('/spawn-bot', (req, res) => {
+    const { ip, nick } = req.query;
+
+    if (bot) {
+        bot.quit();
+        console.log("Önceki bot çıkarıldı.");
     }
 
-    console.log(`Baglanti istegi: ${isim} -> ${ip}`);
+    // IP:PORT ayırma işlemi
+    const host = ip.split(':')[0];
+    const port = parseInt(ip.split(':')[1]) || 25565;
 
-    const bot = mineflayer.createBot({
-        host: ip,
-        port: 25565,
-        username: isim,
-        version: "1.20.1" 
+    console.log(`BAGLANTI: ${host}:${port} | NICK: ${nick}`);
+
+    bot = mineflayer.createBot({
+        host: host,
+        port: port,
+        username: nick,
+        version: "1.20.1", // Sunucu sürümünle aynı olmalı
+        hideErrors: false
     });
 
-    bot.on('spawn', () => console.log(`${isim} oyuna girdi!`));
-    bot.on('error', (err) => console.log("Hata:", err.message));
-    bot.on('kicked', (reason) => console.log("Atildi:", reason));
+    bot.on('spawn', () => {
+        console.log("BAŞARILI: Bot sunucuya giriş yaptı!");
+        // Botun oyunda kalması için sürekli zıplama
+        setInterval(() => {
+            if (bot.entity) {
+                bot.setControlState('jump', true);
+                setTimeout(() => bot.setControlState('jump', false), 500);
+            }
+        }, 3000);
+    });
 
-    res.send(`Sinyal firlatildi! ${isim} su an sızıyor...`);
+    bot.on('chat', (username, message) => {
+        console.log(`<${username}> ${message}`);
+    });
+
+    bot.on('error', (err) => console.log("HATA: " + err.message));
+    bot.on('kicked', (reason) => console.log("ATILDI: " + reason));
+
+    res.send("BOT_YOLA_CIKTI");
 });
 
-app.listen(port, () => {
-    console.log(`Sunucu ${port} portunda aktif.`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Bot Motoru ${PORT} Portunda Hazır.`);
 });
