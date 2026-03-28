@@ -1,39 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>NEON MC PANEL</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRIGGER VIP | SERVER STRESSER</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="background-overlay"></div>
+    <div class="container">
+        <header>
+            <h1>TRIGGER <span class="vip-text">VIP</span></h1>
+            <p class="subtitle">129GB RAM POWERED ATTACK INTERFACE</p>
+        </header>
 
-<div class="bg"></div>
+        <div class="status-bar">
+            <div class="status-item">STATUS: <span id="engine-status" class="online">ONLINE</span></div>
+            <div class="status-item">RAM: <span class="neon-green">129GB</span></div>
+            <div class="status-item">NODES: <span class="neon-green">ACTIVE</span></div>
+        </div>
 
-<div class="container">
+        <div class="attack-panel">
+            <div class="input-group">
+                <label>TARGET SERVER (IP:PORT)</label>
+                <input type="text" id="serverIp" placeholder="worldmapwar.aternos.me:64526">
+            </div>
 
-<h1 class="title">⚡ NEON MC PANEL ⚡</h1>
+            <div class="input-group">
+                <label>BOT COUNT (MAX 100)</label>
 
-<input id="ip" placeholder="Server IP yaz...">
-<button class="neon-btn" onclick="check()">CHECK</button>
-
-<div class="card" id="statusBox">
-Status: -
-</div>
-
-<div class="card">
-<h2>💎 VIP</h2>
-<button class="neon-btn" onclick="vip()">AKTİV ET</button>
-<p id="vip"></p>
-</div>
-
-<div class="card">
-<h2>⚡ BOT (DEMO)</h2>
-<button class="neon-btn" onclick="bot()">START</button>
-<p id="bot"></p>
-</div>
-
-</div>
-
-<script src="script.js"></script>
-</body>
-</html>
+              
