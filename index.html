@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MINECRAFT AFK BOT</title>
+    <style>
+        body { background: #121212; color: #00ff00; font-family: sans-serif; text-align: center; padding-top: 100px; }
+        .box { border: 2px solid #00ff00; display: inline-block; padding: 40px; border-radius: 10px; background: #1a1a1a; box-shadow: 0 0 15px #00ff00; }
+        input { padding: 12px; margin: 10px; width: 250px; background: #000; border: 1px solid #00ff00; color: #00ff00; border-radius: 5px; }
+        button { padding: 12px 25px; background: #00ff00; color: #000; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; }
+        button:hover { background: #008800; color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h1>AFK BOT V1</h1>
+    <input type="text" id="ip" placeholder="Sunucu IP (play.server.com)">
+    <br>
+    <input type="text" id="isim" placeholder="Bot İsmi">
+    <br>
+    <button onclick="calistir()">BOTU SUNUCUYA SOK</button>
+    <p id="status">Hazır...</p>
+</div>
+
+<script>
+    function calistir() {
+        const ip = document.getElementById('ip').value;
+        const isim = document.getElementById('isim').value;
+        const status = document.getElementById('status');
+        
+        status.innerText = "Sinyal iletiliyor...";
+        
+        // Render linkin otomatik bağlı
+        fetch(`https://botbasma.onrender.com/bot-gonder?ip=${ip}&isim=${isim}`)
+            .then(() => { status.innerText = "İşlem başarılı! Sunucuyu kontrol et."; });
+    }
+</script>
+
+</body>
+</html>
