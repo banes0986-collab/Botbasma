@@ -1,28 +1,23 @@
-const logs = document.getElementById('logs');
-
-function addLog(msg) {
-    const p = document.createElement('p');
-    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    logs.appendChild(p);
-    logs.scrollTop = logs.scrollHeight;
-}
+// BURASI ÇOK ÖNEMLİ: Kendi Render linkini buraya tırnak içine yaz!
+const API_URL = "https://botbasma.onrender.com"; 
 
 async function startBots() {
     const ip = document.getElementById('ip').value;
     const count = document.getElementById('count').value;
     
-    document.getElementById('targetName').textContent = ip;
-    addLog(`Hedefe saldırı başladı: ${ip}`);
+    // Konsola yazdır
+    addLog(`Hedef belirlendi: ${ip}. Botlar hazırlanıyor...`, 'sys');
 
-    await fetch('/deploy', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ ip, count })
-    });
-}
-
-async function stopBots() {
-    await fetch('/stop', { method: 'POST' });
-    addLog("Tüm birimler durduruldu.");
-    document.getElementById('botCount').textContent = "0/500";
+    // Render'a emir gönder
+    try {
+        const response = await fetch(`${API_URL}/deploy`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ ip: ip, count: parseInt(count) })
+        });
+        const data = await response.json();
+        addLog(`Sistem Mesajı: ${data.message}`, 'sys');
+    } catch (error) {
+        addLog("Hata: Render sunucusuna ulaşılamadı. Uyanmasını bekle!", "err");
+    }
 }
