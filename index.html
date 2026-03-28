@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>TRIGGER VIP | Bot Control</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>MC Panel</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="dashboard">
-        <header>
-            <div class="logo">TRIGGER <span>VIP</span></div>
-            <div class="user">ADMIN: <strong>TRIGGERBABA</strong> <span class="badge">VIP PRO</span></div>
-        </header>
 
-        <div class="stats">
-            <div class="stat-card">STATUS: <span id="status" class="neon-green">READY</span></div>
-            <div class="stat-card">TARGET: <span id="targetName" class="neon-blue">NONE</span></div>
-            <div class="stat-card">BOTS: <span id="botCount">0/500</span></div>
-        </div>
+<div class="container">
 
-        <div class="control-panel">
-            <div class="inputs">
-                <input type="text" id="ip" placeholder="SERVER IP (play.server.com)">
-                <input type="number" id="count" placeholder="BOT COUNT (Max 50)">
-                <button onclick="startBots()" class="btn-deploy">DEPLOY BOTS</button>
-                <button onclick="stopBots()" class="btn-stop">STOP ALL</button>
-            </div>
-            
-            <div class="console">
-                <div class="console-header">LIVE SYSTEM CONSOLE</div>
-                <div id="logs" class="log-area">
-                    <p class="sys">[SYSTEM] Trigger VIP v2.1 Ready...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="script.js"></script>
+<h1>⚡ Minecraft OP Panel</h1>
+
+<input type="text" id="ip" placeholder="Server IP yaz...">
+<button onclick="check()">Check</button>
+
+<div class="card" id="statusBox">
+<p>Status: -</p>
+<p>Players: -</p>
+<p>Ping: -</p>
+</div>
+
+<div class="card">
+<h2>🔥 VIP Sistem</h2>
+<button onclick="vip()">VIP Aktiv Et</button>
+<p id="vipStatus"></p>
+</div>
+
+<div class="card">
+<h2>⚡ Stress Test (Demo)</h2>
+<button onclick="stress()">Start</button>
+<p id="stressStatus"></p>
+</div>
+
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
