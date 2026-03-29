@@ -1,70 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRIGGER VIP v2.1 | Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>TRIGGERBABA | VIP v13.0 TPS CRUSHER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --main-color: #ff0000; --bg-color: #0a0a0a; --card-bg: #151515; }
+        body { background: var(--bg-color); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; overflow-x: hidden; }
+        .container { max-width: 900px; margin: 50px auto; padding: 20px; }
+        
+        /* HEADER */
+        header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid var(--main-color); padding-bottom: 20px; }
+        header h1 { font-size: 3rem; text-shadow: 0 0 20px var(--main-color); margin: 0; }
+        header p { color: #888; letter-spacing: 2px; }
+
+        /* TPS GÖSTERGE - CANLI */
+        .status-bar { display: flex; justify-content: space-between; background: var(--card-bg); padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 5px solid var(--main-color); }
+        .tps-box { text-align: center; width: 100%; }
+        #tps-value { font-size: 2.5rem; font-weight: bold; color: #00ff00; transition: 0.3s; }
+
+        /* INPUTS */
+        .attack-box { background: var(--card-bg); padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 10px; color: #bbb; }
+        input { width: 100%; padding: 15px; background: #222; border: 1px solid #333; color: white; border-radius: 5px; font-size: 1rem; outline: none; box-sizing: border-box; }
+        input:focus { border-color: var(--main-color); }
+
+        /* BUTTONS */
+        .btn { width: 100%; padding: 20px; border: none; border-radius: 5px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .btn-start { background: var(--main-color); color: white; margin-bottom: 15px; }
+        .btn-start:hover { background: #cc0000; transform: scale(1.02); box-shadow: 0 0 30px rgba(255,0,0,0.4); }
+        .btn-stop { background: #333; color: #fff; }
+        .btn-stop:hover { background: #444; }
+
+        /* CONSOLE */
+        #console { background: black; padding: 15px; border-radius: 5px; height: 150px; overflow-y: auto; font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; margin-top: 20px; border: 1px solid #222; }
+        .log-info { color: #00ff00; }
+        .log-error { color: #ff0000; }
+    </style>
 </head>
 <body>
-    <div class="overlay"></div>
-    <div class="container">
-        <nav class="navbar">
-            <h1 class="logo">TRIGGER <span class="vip-text">VIP</span></h1>
-            <ul class="nav-links">
-                <li class="active"><img src="https://img.icons8.com/material-outlined/24/ffffff/dashboard.png"> Dashboard</li>
-                <li>Bot Network</li>
-                <li>Stress Test</li>
-                <li>Logs</li>
-                <li>Settings</li>
-            </ul>
-            <div class="user-profile">
-                <span>ADMIN: TRIGGERBABA <span class="vip-pro">VIP PRO</span></span>
-                <img src="https://img.icons8.com/material-outlined/24/cccccc/gender-neutral-user.png">
-            </div>
-        </nav>
 
-        <div class="top-stats">
-            <div class="stat-card">NETWORK STATUS: <span class="neon-green">ONLINE</span></div>
-            <div class="stat-card">ACTIVE BOTS: <span id="bot-count" class="neon-blue">142/250</span></div>
-            <div class="stat-card">TARGET SERVER: <span id="current-target" class="neon-teal">PLAY.HYPIXEL.NET</span></div>
-            <div class="stat-card">LAST TPS: <span id="server-tps" class="neon-yellow">19.8</span></div>
-        </div>
+<div class="container">
+    <header>
+        <h1>TRIGGERBABA VIP</h1>
+        <p>GHOST ENGINE v13.0 | 9.9M PACKET SYSTEM</p>
+    </header>
 
-        <div class="main-content">
-            <div class="command-center">
-                <h2>SYSTEM COMMAND CENTER</h2>
-                <div class="input-row">
-                    <input type="text" id="serverIp" placeholder="SERVER IP (play.server.com:25565)">
-                    <input type="number" id="botCount" placeholder="BOT COUNT (Max 500)" max="500">
-                </div>
-                <input type="text" id="chatMsg" placeholder="MESSAGE TO CHAT">
-                <div class="button-row">
-                    <button onclick="deployBots()" class="btn btn-blue">DEPLOY BOTS</button>
-                    <button onclick="startStress()" class="btn btn-red pulse">START STRESS TEST</button>
-                    <button onclick="stopBots()" class="btn btn-gray">STOP ALL</button>
-                    <button onclick="sendGlobal()" class="btn btn-green">SEND GLOBAL MSG</button>
-                </div>
-            </div>
-            <div class="latency-graph">
-                <h2>SERVER LATENCY (MS)</h2>
-                <img src="graph.png" alt="Latency Graph" class="graph-img"> </div>
-        </div>
-
-        <div class="terminal">
-            <h2>LIVE SYSTEM CONSOLE [TRIGGER_VIP_v2.1]</h2>
-            <div class="terminal-header">
-                <div class="dots"></div>
-                <div class="control-icons">_ □ X</div>
-            </div>
-            <div class="terminal-body" id="console-output">
-                > [SYSTEM] Initializing handshake with backend... SUCCESS.<br>
-                > [SYSTEM] Awaiting target commands...<br>
-                > Input Server IP and Bot Count to begin.
-            </div>
+    <div class="status-bar">
+        <div class="tps-box">
+            <label>HEDEF SUNUCU TPS</label>
+            <div id="tps-value">20.0</div>
+            <small id="tps-status">DURUM: BEKLEMEDE</small>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <div class="attack-box">
+        <div class="input-group">
+            <label><i class="fas fa-server"></i> SUNUCU IP (Port dahil)</label>
+            <input type="text" id="targetIp" placeholder="orn: play.sunucuadi.com:25565">
+        </div>
+        <div class="input-group">
+            <label><i class="fas fa-users"></i> BOT SAYISI (MAX 1000)</label>
+            <input type="number" id="botCount" value="100" max="1000">
+        </div>
+
+        <button class="btn btn-start" onclick="startAttack()"><i class="fas fa-biohazard"></i> STRESS TESTİ BAŞLAT (9.9M PACKET)</button>
+        <button class="btn btn-stop" onclick="stopAttack()"><i class="fas fa-power-off"></i> DURDUR</button>
+
+        <div id="console">
+            <div class="log-info">> Sistem hazır. Hedef bekleniyor...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // RENDER LİNKİNİ BURAYA YAPIŞTIR KANKA
+    const API_URL = "https://senin-render-app-linkin.onrender.com";
+
+    async function startAttack() {
+        const ip = document.getElementById('targetIp').value;
+        const count = document.getElementById('botCount').value;
+        const log = document.getElementById('console');
+
+        if(!ip) return alert("IP gir kanka!");
+
+        log.innerHTML += `<div class="log-info">> [Sinyal] Hedef ${ip} için 524GB RAM ordusu sevk ediliyor...</div>`;
+
+        try {
+            const response = await fetch(`${API_URL}/deploy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ip, count })
+            });
+            const data = await response.json();
+            log.innerHTML += `<div class="log-info">> [ONAY] ${data.message}</div>`;
+        } catch (err) {
+            log.innerHTML += `<div class="log-error">> [HATA] Render bağlantısı kurulamadı!</div>`;
+        }
+    }
+
+    // CANLI TPS TAKİBİ
+    setInterval(async () => {
+        try {
+            const res = await fetch(`${API_URL}/status`);
+            const data = await res.json();
+            const tpsElem = document.getElementById('tps-value');
+            const statusElem = document.getElementById('tps-status');
+            
+            tpsElem.innerText = data.tps;
+
+            if(data.tps < 15 && data.tps > 5) {
+                tpsElem.style.color = "orange";
+                statusElem.innerText = "DURUM: LAG BAŞLADI";
+            } else if(data.tps <= 5) {
+                tpsElem.style.color = "red";
+                statusElem.innerText = "DURUM: SUNUCU ÇÖKTÜ / CRASHED";
+                document.body.style.boxShadow = "inset 0 0 100px rgba(255,0,0,0.5)";
+            } else {
+                tpsElem.style.color = "#00ff00";
+                statusElem.innerText = "DURUM: AKTİF";
+            }
+        } catch (e) {}
+    }, 1000);
+
+    function stopAttack() {
+        location.reload(); // En hızlı durdurma yolu
+    }
+</script>
+
 </body>
 </html>
