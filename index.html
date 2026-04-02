@@ -3,47 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRIGGERBABA | RYZEN 9 NEON OVERLORD</title>
+    <title>TRIGGERBABA | THE REAPER v19.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #ff003c; --bg: #050505; --card: rgba(15, 15, 15, 0.95); }
+        :root { --neon: #ff003c; --bg: #050505; --card: rgba(15, 15, 15, 0.95); --green: #00ff00; }
         
         body { 
             background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif;
-            margin: 0; overflow: hidden; height: 100vh;
+            margin: 0; overflow: hidden; height: 100vh; transition: background 1s;
         }
 
-        /* MATRIX BG */
-        #matrix { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; }
+        #matrix { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; }
 
         .wrapper {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; padding: 20px; box-sizing: border-box;
         }
 
-        /* HEADER */
-        header { text-align: center; margin-bottom: 30px; }
+        header { text-align: center; margin-bottom: 25px; }
         header h1 { 
-            font-size: 3.5rem; margin: 0; color: var(--neon);
-            text-shadow: 0 0 15px var(--neon), 0 0 30px var(--neon);
-            letter-spacing: 5px; animation: glitch 1s infinite linear alternate-reverse;
-        }
-        @keyframes glitch {
-            0% { text-shadow: 2px 0 var(--neon); }
-            100% { text-shadow: -2px 0 #00ffff; }
+            font-size: 3rem; margin: 0; color: var(--neon);
+            text-shadow: 0 0 20px var(--neon);
+            letter-spacing: 4px;
         }
 
-        /* STATUS GRID */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 800px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; width: 100%; max-width: 900px; margin-bottom: 20px; }
+        
         .stat-card {
-            background: var(--card); border: 1px solid #333; padding: 20px;
-            border-radius: 10px; text-align: center; position: relative; overflow: hidden;
+            background: var(--card); border: 1px solid #222; padding: 15px;
+            border-radius: 12px; text-align: center; border-top: 3px solid var(--neon);
         }
-        .stat-card::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
-            background: var(--neon); box-shadow: 0 0 10px var(--neon);
+        .stat-card h2 { font-size: 2rem; margin: 5px 0; color: var(--green); font-family: 'JetBrains Mono', monospace; }
+        .stat-card label { font-size: 0.7rem; color: #888; letter-spacing: 1px; }
+
+        .attack-form {
+            background: var(--card); padding: 35px; border-radius: 20px;
+            width: 100%; max-width: 900px; border: 1px solid #222;
+            box-shadow: 0 0 50px rgba(0,0,0,1); backdrop-filter: blur(15px);
         }
-        .stat-card h2 { font-size: 2.5rem; margin: 10px 0; color: #00ff00; font-family: 'JetBrains Mono', monospace; }
-        .stat-card label { font-size: 0.8rem; color: #
-                          
+
+        .input-row { display: flex; gap: 15px; margin-bottom: 20px; }
+        .input-group { flex: 1; position: relative; }
+        label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: #aaa; }
+        input {
+            width: 100%; padding: 15px; background: #000;
+            border: 1px solid #333; color: var(--green); border-radius: 8px;
+            font-size: 1rem; outline: none; transition: 0.3s; box-sizing: border-box;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        input:focus { border-color: var(--neon); box-shadow: 0 0 15px rgba(255, 0, 60, 0.2); }
+
+        .btn-launch {
+            width: 100%; padding: 20px; background: var(--neon); color: white;
+            border: none; border-radius: 8px; font-size: 1.4rem; font-weight: bold;
+            cursor: pointer; transition: 0.3s; text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(255, 0, 60, 0.3);
+        }
+        .btn-launch:hover { background: #ff1e56; transform: translateY(-2px); box-shadow: 0 10px 30px var(--neon); }
+
+        #console {
+            margin-top: 20px; background: rgba(0,0,0,0.7); padding: 12px;
+            height: 100px; border-radius: 8px; font-size: 0.85rem; color: #666;
+            overflow-y: auto; font-family: 'JetBrains Mono', monospace; border: 1px solid #111;
+        }
+        .ping-critical { color: #ff0000 !important; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="wrapper">
+    <header>
+        <h1>THE REAPER v19.0</h1>
+        <p style="color: #444; letter-spacing: 3px;">RYZEN 9 3500+ | 524GB RAM | KERNEL EXPLOIT</p>
+    </header>
+
+    <div class="grid">
+        <div class="stat-card">
+            <label>REAL-TIME TPS</label>
+            <h2 id="tps">20.0</h2>
+            <small id="tps-status" style="color:#444">STABLE</small>
+        </div>
+        <div class="stat-card">
+            <label>TARGET PING</label>
+            <h2 id="ping">0 ms</h2>
+            <small id="server-status" style="color:#444">WAITING...</small>
+        </div>
+        <div class="stat-card">
+            <label>ACTIVE PLAYERS</label>
+            <h2 id="players">0</h2>
+            <small style="color:#444">LIVE DATA</small>
+        </div>
+    </div>
+
+    <div class="attack-form">
+        <div class="input-row">
+            <div class="input-group">
+                <label>TARGET HOST:PORT</label>
+                <input type="text" id="target" placeholder="play.server.com:25565">
+            </div>
+            <div class="input-group">
+                <label>ATTACK THREADS (R9)</label>
+                <input type="text" value="3000 Sockets" disabled style="color:var(--neon); text-align:center;">
+            </div>
+        </div>
+
+        <button class="btn-launch" onclick="execute()"><i class="fas fa-skull-crossbones"></i> INITIATE TOTAL ANNIHILATION</button>
+        
+        <div id="console">> [SYSTEM] Ryzen 9 kernel modules loaded. 524GB RAM Buffer ready...</div>
+    </div>
+</div>
+
+<script>
+    // MATRIX BACKGROUND
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.height = window.innerHeight; canvas.width = window.innerWidth;
+    const chars = "1010101010101010";
+    const fontSize = 14; const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+    function drawMatrix() {
+        ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#ff003c"; ctx.font = fontSize + "px arial";
+        for(let i=0; i<drops.length; i++) {
+            const text = chars.charAt(Math.floor(Math.random()*chars.length));
+            ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+            if(drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    setInterval(drawMatrix, 50);
+
+    // API CONFIG
+    const API = "https://botbasma.onrender.com";
+
+    async function execute() {
+        const target = document.getElementById('target').value;
+        const consoleLog = document.getElementById('console');
+        if(!target) return alert("Hedef IP eksik kanka!");
+
+        consoleLog.innerHTML = `<div style="color:var(--neon)">> [KERNEL] Target Locked: ${target}</div>`;
+        consoleLog.innerHTML += `<div>> [STORM] 128KB Payload flooding via 3000 TCP sockets...</div>`;
+
+        try {
+            const res = await fetch(`${API}/deploy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ip: target })
+            });
+            const data = await res.json();
+            consoleLog.innerHTML += `<div style="color:var(--green)">> [SUCCESS] ${data.message}</div>`;
+        } catch (e) {
+            consoleLog.innerHTML += `<div style="color:red">> [FATAL] Render API link unreachable!</div>`;
+        }
+    }
+
+    // LIVE DATA MONITOR
+    setInterval(async () => {
+        try {
+            const res = await fetch(`${API}/status`);
+            const data = await res.json();
+            
+            document.getElementById('tps').innerText = data.tps;
+            document.getElementById('ping').innerText = `${data.ping} ms`;
+            document.getElementById('players').innerText = data.players;
+            document.getElementById('server-status').innerText = data.status;
+
+            const tpsElem = document.getElementById('tps');
+            const pingElem = document.getElementById('ping');
+
+            if(data.tps < 5) {
+                tpsElem.style.color = "red";
+                pingElem.classList.add('ping-critical');
+                document.body.style.backgroundColor = "#1a0000";
+            } else if(data.tps < 15) {
+                tpsElem.style.color = "orange";
+                pingElem.classList.remove('ping-critical');
+                document.body.style.backgroundColor = "#050505";
+            } else {
+                tpsElem.style.color = "#00ff00";
+                document.body.style.backgroundColor = "#050505";
+            }
+        } catch (err) {}
+    }, 2000);
+</script>
+
+</body>
+</html>
