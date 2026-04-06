@@ -1,61 +1,89 @@
-<style>
-    :root { --safety-blue: #0088ff; --danger-red: #ff3300; --bg: #020202; }
-    body { background: var(--bg); color: #e0e0e0; font-family: 'JetBrains Mono', monospace; }
-    .header { border-bottom: 2px solid var(--safety-blue); padding: 20px; text-align: center; }
-    .status-grid { display: flex; gap: 20px; justify-content: center; margin-top: 30px; }
-    .card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 25px; border-radius: 5px; width: 250px; text-align: center; }
-    .card h3 { color: var(--safety-blue); font-size: 0.9rem; }
-    .card p { font-size: 1.8rem; margin: 10px 0; font-weight: bold; }
-    .action-box { max-width: 600px; margin: 40px auto; background: #080808; padding: 30px; border: 1px dashed #333; }
-    input { width: 100%; padding: 15px; background: #000; border: 1px solid #222; color: #00ff00; margin-bottom: 20px; }
-    button { width: 100%; padding: 15px; background: var(--safety-blue); border: none; color: white; cursor: pointer; font-weight: bold; }
-    button:hover { background: #0066cc; }
-</style>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xynis Cloud | Control Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #0f111a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .sidebar { background: #1a1d2b; border-right: 1px solid #2d324a; }
+        .card { background: #1a1d2b; border: 1px solid #2d324a; transition: 0.3s; }
+        .card:hover { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .accent-text { color: #3b82f6; }
+        .btn-glow:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        input { background: #0f111a !important; border: 1px solid #2d324a !important; color: white !important; }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
 
-<div class="header">
-    <h1>REAPER CYBER-SECURITY AUDIT</h1>
-    <p>Enterprise Stress Testing Platform | Ryzen 9 Powered</p>
-</div>
-
-<div class="status-grid">
-    <div class="card">
-        <h3>LATENCY (MS)</h3>
-        <p id="latency">0</p>
+    <div class="sidebar w-full md:w-64 p-6 flex flex-col">
+        <div class="text-2xl font-bold mb-10 flex items-center gap-2">
+            <i class="fas fa-bolt accent-text"></i> XYNIS <span class="text-gray-500">CLOUD</span>
+        </div>
+        <nav class="flex-grow space-y-4">
+            <a href="#" class="block p-3 rounded-lg bg-blue-600 text-white"><i class="fas fa-rocket mr-2"></i> Attack Hub</a>
+            <a href="#" class="block p-3 rounded-lg hover:bg-gray-800"><i class="fas fa-server mr-2"></i> Methods</a>
+            <a href="#" class="block p-3 rounded-lg hover:bg-gray-800"><i class="fas fa-history mr-2"></i> Logs</a>
+        </nav>
+        <div class="mt-auto pt-6 text-xs text-gray-500 border-t border-gray-800">
+            Design by <span class="text-white">triggerbabaa</span>
+        </div>
     </div>
-    <div class="card">
-        <h3>LOAD CAPACITY</h3>
-        <p id="load">STABLE</p>
-    </div>
-    <div class="card">
-        <h3>ACTIVE PROBES</h3>
-        <p id="probes">0</p>
-    </div>
-</div>
 
-<div class="action-box">
-    <label>TARGET INFRASTRUCTURE (IP:PORT)</label>
-    <input type="text" id="target" placeholder="127.0.0.1:25565">
-    <button onclick="startAudit()">INITIATE CAPACITY TEST</button>
-</div>
+    <div class="flex-grow p-4 md:p-10">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-semibold">Minecraft <span class="accent-text">Packet Injector</span></h1>
+            <div class="text-sm bg-gray-800 px-4 py-2 rounded-full border border-gray-700">
+                System Status: <span class="text-green-400 font-bold">ONLINE</span>
+            </div>
+        </div>
 
-<script>
-    const API = "https://botbasma.onrender.com";
-    async function startAudit() {
-        const ip = document.getElementById('target').value;
-        await fetch(`${API}/start-audit`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ ip })
-        });
-        alert("Denetim Başlatıldı. Veriler akıyor...");
-    }
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="card p-6 rounded-xl text-center">
+                <div class="text-gray-400 text-sm mb-2">Network Load</div>
+                <div class="text-3xl font-bold">1.2 GB/s</div>
+            </div>
+            <div class="card p-6 rounded-xl text-center">
+                <div class="text-gray-400 text-sm mb-2">Active Bot Threads</div>
+                <div class="text-3xl font-bold">5,000+</div>
+            </div>
+            <div class="card p-6 rounded-xl text-center">
+                <div class="text-gray-400 text-sm mb-2">Total Attacks</div>
+                <div class="text-3xl font-bold">248</div>
+            </div>
+        </div>
 
-    setInterval(async () => {
-        const res = await fetch(`${API}/audit-status`);
-        const data = await res.json();
-        document.getElementById('latency').innerText = data.latency;
-        document.getElementById('load').innerText = data.loadCapacity;
-        document.getElementById('probes').innerText = data.activeConnections;
-        if(data.latency > 1000) document.getElementById('load').style.color = "red";
-    }, 2000);
-</script>
+        <div class="max-w-2xl mx-auto card p-8 rounded-2xl shadow-2xl">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Target IP / Address</label>
+                    <input type="text" id="targetIP" class="w-full p-4 rounded-xl outline-none focus:border-blue-500" placeholder="play.hypixel.net">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Port</label>
+                        <input type="number" id="targetPort" value="25565" class="w-full p-4 rounded-xl outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Method</label>
+                        <select id="method" class="w-full p-4 rounded-xl bg-[#0f111a] border border-[#2d324a] outline-none">
+                            <option>UDP-BYPASS</option>
+                            <option>TCP-KILLER</option>
+                            <option>MC-BOT-JOIN</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="btn-container flex gap-4">
+                    <button onclick="sendAction('/attack')" class="flex-grow py-4 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition btn-glow">
+                        LAUNCH ATTACK <i class="fas fa-paper-plane ml-2"></i>
+                    </button>
+                    <button onclick="sendAction('/stop')" class="px-8 py-4 rounded-xl bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white font-bold transition border border-red-600/50">
+                        STOP
+                    </button>
+                </div>
+            </div>
+            
