@@ -1,48 +1,53 @@
 const net = require('net');
-const fs = require('fs');
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
-// AYARLAR
-const TARGET_IP = '127.0.0.1'; // Minecraft sunucunun IP'si
-const TARGET_PORT = 25565;    // Minecraft sunucunun portu
-const PROXY_PORT = 25577;     // Oyuncuların gireceği korumalı port
+// --- SİSTEM AYARLARI ---
+const MC_CONFIG = {
+    IP: '127.0.0.1', // Buraya korumak istediğin sunucu IP'sini yaz
+    PORT: 25565,
+    SHIELD_PORT: 25577
+};
 
-const packetLimits = new Map();
-const blackList = new Set();
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
 
-const server = net.createServer((clientSocket) => {
-    const remoteIp = clientSocket.remoteAddress;
+// --- VERİTABANI (Basit JSON Mantığı) ---
+let users = [
+    { mail: 'triggerbaba31@gmail.com', pass: 'trigger3163', role: 'KURUCU' }
+];
+let blackList = new Set();
+let isShieldActive = true;
 
-    // 1. Kara Liste Kontrolü
-    if (blackList.has(remoteIp)) {
-        clientSocket.destroy();
-        return;
-    }
-
-    // 2. TCP Flood Koruması (Hız Sınırı)
-    const now = Date.now();
-    const logs = packetLimits.get(remoteIp) || [];
-    const recentLogs = logs.filter(time => now - time < 1000);
+// --- API: KAYIT VE YETKİ ---
+app.post('/api/register', (req, res) => {
+    const { mail, pass } = req.body;
+    if (users.find(u => u.mail === mail)) return res.json({ success: false, msg: "Bu mail zaten kayıtlı!" });
     
-    if (recentLogs.length > 5) { // Saniyede 5'ten fazla yeni bağlantı açarsa BAN
-        console.log(`[BAN] Saldırı algılandı: ${remoteIp}`);
-        blackList.add(remoteIp);
-        clientSocket.destroy();
-        return;
-    }
-    recentLogs.push(now);
-    packetLimits.set(remoteIp, recentLogs);
-
-    // 3. Güvenli Bağlantıyı Minecraft'a Yönlendir
-    const targetSocket = net.createConnection(TARGET_PORT, TARGET_IP, () => {
-        clientSocket.pipe(targetSocket);
-        targetSocket.pipe(clientSocket);
-    });
-
-    targetSocket.on('error', () => clientSocket.destroy());
-    clientSocket.on('error', () => targetSocket.destroy());
-
+    users.push({ mail, pass, role: 'OYUNCU' });
+    res.json({ success: true, msg: "Kayıt başarılı! Admin onayından sonra panel açılır." });
 });
 
-server.listen(PROXY_PORT, () => {
-    console.log(`[TriggerGuard] Shield Aktif! Port: ${PROXY_PORT} -> ${TARGET_PORT}`);
+app.post('/api/login', (req, res) => {
+    const { mail, pass } = req.body;
+    const user = users.find(u => u.mail === mail && u.pass === pass);
+    if (user) res.json({ success: true, user });
+    else res.status(401).json({ success: false });
 });
+
+// Kurucuya özel: Tüm kullanıcıları görme
+app.get('/api/admin/users', (req, res) => {
+    const adminMail = req.headers['admin-mail'];
+    const admin = users.find(u => u.mail === adminMail && u.role === 'KURUCU');
+    if (admin) res.json(users);
+    else res.status(403).send("Yetkin yok!");
+});
+
+// --- SHIELD KORUMA MOTORU ---
+const shield = net.createServer((client) => {
+    if (!isShieldActive || blackList.has(client.remoteAddress)) return client.destroy();
+
+    const target = net.createConnection(MC_CONFIG.PORT, MC_CONFIG.IP, () => {
+        
