@@ -2,175 +2,264 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>TriggerGuard OS | Advanced Protection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TriggerGuard | Elite Command Center</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #00f2ff; --s: #0066ff; --bg: #05070a; --card: rgba(255,255,255,0.05); }
-        body { margin:0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; overflow: hidden; }
-        .glass { background: var(--card); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; }
+        :root {
+            --p: #00f2ff; --s: #7000ff; --bg: #030508; --card: rgba(13, 17, 23, 0.8);
+            --border: rgba(255, 255, 255, 0.1); --green: #00ff88; --red: #ff3366;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: #e6edf3; overflow: hidden; height: 100vh; }
+
+        /* --- BACKGROUND ANIMATION --- */
+        .bg-glow {
+            position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%; filter: blur(80px); z-index: -1; animation: move 20s infinite alternate;
+        }
+        @keyframes move { from { top: -10%; left: -10%; } to { top: 80%; left: 80%; } }
+
+        /* --- AUTH SCREEN --- */
+        #auth-wrap {
+            height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, #0a0f18 0%, #030508 100%); z-index: 100;
+        }
+        .auth-card {
+            background: var(--card); backdrop-filter: blur(20px); border: 1px solid var(--border);
+            padding: 50px; width: 450px; border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .auth-card h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; background: linear-gradient(90deg, var(--p), var(--s)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; }
         
-        /* GİRİŞ EKRANI */
-        #auth-wrap { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #101520, #05070a); }
-        .auth-card { padding: 40px; width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: rgba(0,0,0,0.3); border: 1px solid #333; color: white; border-radius: 8px; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: linear-gradient(90deg, var(--p), var(--s)); color: #000; transition: 0.3s; }
-        .btn:hover { box-shadow: 0 0 20px rgba(0,242,255,0.5); transform: translateY(-2px); }
+        input {
+            width: 100%; padding: 15px; margin: 12px 0; background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+            border-radius: 12px; color: white; transition: 0.3s; font-size: 15px;
+        }
+        input:focus { border-color: var(--p); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); outline: none; }
 
-        /* ANA PANEL */
-        #dashboard { display: grid; grid-template-columns: 260px 1fr; height: 100vh; display: none; }
-        .sidebar { padding: 30px; border-right: 1px solid rgba(255,255,255,0.1); }
-        .content { padding: 40px; overflow-y: auto; }
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 12px; cursor: pointer;
+            font-weight: 700; background: linear-gradient(45deg, var(--p), var(--s)); color: #000;
+            transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 242, 255, 0.3); }
+
+        /* --- MAIN DASHBOARD --- */
+        #dashboard { display: grid; grid-template-columns: 280px 1fr; height: 100vh; display: none; }
         
-        .nav-link { padding: 15px; margin: 10px 0; cursor: pointer; border-radius: 10px; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
-        .nav-link:hover, .active { background: rgba(0,242,255,0.1); color: var(--p); }
+        /* Sidebar */
+        .sidebar {
+            background: rgba(8, 10, 14, 0.9); border-right: 1px solid var(--border); padding: 40px 20px;
+            display: flex; flex-direction: column;
+        }
+        .nav-link {
+            padding: 16px 20px; margin: 6px 0; border-radius: 14px; cursor: pointer;
+            display: flex; align-items: center; gap: 15px; color: #8b949e; transition: 0.3s; font-weight: 500;
+        }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.05); color: var(--p); }
+        .nav-link.active { border-right: 3px solid var(--p); background: linear-gradient(90deg, rgba(0,242,255,0.1), transparent); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .server-card { padding: 20px; position: relative; overflow: hidden; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: #3fb950; margin-right: 5px; }
+        /* Content Area */
+        .main-content { padding: 50px; overflow-y: auto; }
+        .header-box { margin-bottom: 40px; }
+        .header-box h2 { font-size: 28px; font-weight: 800; }
 
-        /* KURUCU PANELİ */
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .admin-table th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .rank-badge { padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; }
-        .rank-kurucu { background: #ffd700; color: #000; }
+        /* Server Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+        .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+            padding: 30px; transition: 0.3s; position: relative; overflow: hidden;
+        }
+        .card:hover { border-color: var(--p); transform: translateY(-5px); }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--p); }
+
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+            background: rgba(0, 255, 136, 0.1); color: var(--green); border-radius: 20px; font-size: 12px; font-weight: 700;
+        }
+
+        /* Admin Table */
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; border-radius: 15px; overflow: hidden; }
+        .admin-table th { background: rgba(255,255,255,0.03); color: #8b949e; text-align: left; padding: 18px; font-size: 13px; }
+        .admin-table td { padding: 18px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .rank-tag { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+        .rank-owner { background: #ffd700; color: #000; }
+
+        /* Terminal Area */
+        .terminal {
+            background: #010204; border: 1px solid var(--border); border-radius: 16px;
+            padding: 25px; font-family: 'Fira Code', monospace; font-size: 13px; color: #00ff88;
+            height: 300px; overflow-y: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
+    <div class="bg-glow"></div>
 
     <div id="auth-wrap">
-        <div class="auth-card glass">
-            <h1 style="color:var(--p); letter-spacing: 4px;">TRIGGERGUARD</h1>
-            <p id="auth-mode-text">Sistem Güvenlik Girişi</p>
-            <div id="auth-inputs">
-                <input type="email" id="email" placeholder="E-posta Adresi">
-                <input type="password" id="pass" placeholder="Şifre">
-                <button class="btn" onclick="login()">SİSTEME BAĞLAN</button>
+        <div class="auth-card">
+            <h1>TRIGGERGUARD</h1>
+            <p style="color: #8b949e; margin-bottom: 30px;">Sunucu Güvenlik Protokolü</p>
+            
+            <div id="login-form">
+                <input type="email" id="l-email" placeholder="E-posta">
+                <input type="password" id="l-pass" placeholder="Şifre">
+                <button class="btn" onclick="authAction('login')">Sistemi Başlat</button>
+                <p style="font-size: 13px; margin-top: 20px; cursor: pointer; color: var(--p);" onclick="toggleAuth()">Yeni Hesap Oluştur</p>
             </div>
-            <p style="font-size: 12px; margin-top: 20px; cursor: pointer; opacity: 0.5;" onclick="toggleAuth()">Hesap Oluştur / Giriş Yap</p>
+
+            <div id="reg-form" class="hidden">
+                <input type="email" id="r-email" placeholder="E-posta">
+                <input type="password" id="r-pass" placeholder="Şifre">
+                <button class="btn" onclick="authAction('reg')">Kayıt Ol</button>
+                <p style="font-size: 13px; margin-top: 20px; cursor: pointer; color: var(--p);" onclick="toggleAuth()">Zaten üyeyim, giriş yap</p>
+            </div>
         </div>
     </div>
 
     <div id="dashboard">
-        <div class="sidebar glass">
-            <div style="text-align: center; margin-bottom: 40px;">
-                <div id="user-rank" class="rank-badge rank-kurucu">KURUCU</div>
-                <p id="user-mail" style="font-size: 12px; margin-top: 10px;"></p>
+        <aside class="sidebar">
+            <div style="margin-bottom: 50px; padding-left: 20px;">
+                <h2 style="color: var(--p); letter-spacing: 2px;">TG OS</h2>
+                <div id="display-rank" class="rank-tag rank-owner" style="margin-top: 5px; display: inline-block;">KURUCU</div>
             </div>
-            <div class="nav-link active" onclick="showPage('home')"><i class="fas fa-server"></i> Sunucularım</div>
-            <div class="nav-link" onclick="showPage('add')"><i class="fas fa-plus-circle"></i> Sunucu Ekle</div>
-            <div id="admin-only" class="hidden" style="display:none;">
-                <div class="nav-link" onclick="loadUsers()"><i class="fas fa-users-cog"></i> Kullanıcı Yönetimi</div>
-            </div>
-            <div class="nav-link" style="margin-top: 50px; color: #ff4d4d;" onclick="location.reload()"><i class="fas fa-power-off"></i> Bağlantıyı Kes</div>
-        </div>
 
-        <div class="content">
-            <div id="page-home">
-                <h1 style="display: flex; justify-content: space-between;">
-                    Aktif Korumalar 
-                    <span style="font-size: 14px; color: var(--p);">Port: 25577</span>
-                </h1>
-                <div class="grid" id="server-list">
-                    <div class="server-card glass">
-                        <h3>Örnek Sunucu</h3>
-                        <p>IP: 1.2.3.4:25565</p>
-                        <span class="status-dot"></span> <span style="color:#3fb950">KORUMA AKTİF</span>
-                        <button class="btn" style="margin-top: 15px; background: #ff4d4d; color: white;">DURDUR</button>
+            <nav>
+                <div class="nav-link active" onclick="switchPage('home', this)"><i class="fas fa-layer-group"></i> Sunucularım</div>
+                <div class="nav-item-admin hidden" id="admin-nav">
+                    <div class="nav-link" onclick="switchPage('admin', this)"><i class="fas fa-user-shield"></i> Kullanıcı Yönetimi</div>
+                </div>
+                <div class="nav-link" onclick="switchPage('add', this)"><i class="fas fa-plus-circle"></i> Sunucu Ekle</div>
+                <div class="nav-link" style="margin-top: 100px; color: var(--red);" onclick="location.reload()"><i class="fas fa-sign-out-alt"></i> Bağlantıyı Kes</div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div id="page-home" class="page-sec">
+                <div class="header-box">
+                    <h2>Korumalı Sunucular</h2>
+                    <p style="color: #8b949e;">Şu an aktif 25577 portu üzerinden yönlendirme yapılıyor.</p>
+                </div>
+                <div class="grid" id="srv-list-container">
+                    <div class="card">
+                        <div class="status-badge"><i class="fas fa-check-circle"></i> Güvende</div>
+                        <h3 style="margin: 15px 0 5px 0;">LegacyPvP Ana Sunucu</h3>
+                        <p style="color: #8b949e; font-size: 13px;">Hedef: 185.25.xx.xx:25565</p>
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                            <span style="font-size: 11px; color: var(--p);">CPU Yükü: %4.2</span>
+                            <button class="btn" style="padding: 8px; margin-top: 10px; font-size: 11px;">Detaylar</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div id="page-add" style="display:none;">
-                <h1>Yeni Sunucu Koru</h1>
-                <div class="glass" style="padding: 30px; max-width: 500px;">
-                    <input type="text" id="srv-name" placeholder="Sunucu Adı (Örn: Survival)">
-                    <input type="text" id="srv-ip" placeholder="Hedef IP (Örn: 185.xx.xx.xx)">
-                    <input type="text" id="srv-port" placeholder="Hedef Port (Örn: 25565)">
-                    <button class="btn" onclick="addServer()">LİSTEYE EKLE VE KORU</button>
+            <div id="page-admin" class="page-sec hidden">
+                <div class="header-box">
+                    <h2>Kullanıcı Yönetimi</h2>
+                    <p style="color: #8b949e;">Tüm kayıtlı mailler ve yetkiler.</p>
                 </div>
-            </div>
-
-            <div id="page-users" style="display:none;">
-                <h1>Kayıtlı Kullanıcılar (Kurucu Paneli)</h1>
-                <div class="glass">
+                <div class="card" style="padding: 0;">
                     <table class="admin-table">
-                        <thead><tr><th>E-posta</th><th>Rütbe</th><th>İşlem</th></tr></thead>
-                        <tbody id="user-table-body"></tbody>
+                        <thead><tr><th>E-POSTA</th><th>RÜTBE</th><th>DURUM</th><th>İŞLEM</th></tr></thead>
+                        <tbody id="admin-user-body">
+                            <tr>
+                                <td>triggerbaba31@gmail.com</td>
+                                <td><span class="rank-tag rank-owner">KURUCU</span></td>
+                                <td><span style="color: var(--green)">Aktif</span></td>
+                                <td>--</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
-        </div>
+
+            <div id="page-add" class="page-sec hidden">
+                <div class="header-box">
+                    <h2>Yeni Kalkan Oluştur</h2>
+                    <p style="color: #8b949e;">İstediğin sunucuyu koruma altına al.</p>
+                </div>
+                <div class="card" style="max-width: 500px;">
+                    <label style="font-size: 12px; color: var(--p);">Sunucu Adı</label>
+                    <input type="text" id="in-srv-name" placeholder="Örn: My Survival">
+                    <label style="font-size: 12px; color: var(--p);">Hedef IP & Port</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="in-srv-ip" placeholder="127.0.0.1">
+                        <input type="text" id="in-srv-port" placeholder="25565" style="width: 100px;">
+                    </div>
+                    <button class="btn" onclick="createNewServer()">Korumayı Başlat</button>
+                </div>
+                <div class="terminal" id="term-out" style="margin-top: 30px;">
+                    > [SYSTEM] Yeni konfigürasyon bekleniyor...
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        let currentUser = null;
+        const API_MAIL = "triggerbaba31@gmail.com";
+        const API_PASS = "trigger3163";
         let servers = [];
 
-        function login() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
+        function toggleAuth() {
+            document.getElementById('login-form').classList.toggle('hidden');
+            document.getElementById('reg-form').classList.toggle('hidden');
+        }
 
-            // TriggerBaba kontrolü
-            if(email === 'triggerbaba31@gmail.com' && pass === 'trigger3163') {
-                currentUser = { email, rank: 'KURUCU' };
-                startApp();
+        function authAction(type) {
+            const m = type === 'login' ? document.getElementById('l-email').value : document.getElementById('r-email').value;
+            const p = type === 'login' ? document.getElementById('l-pass').value : document.getElementById('r-pass').value;
+
+            if (m === API_MAIL && p === API_PASS) {
+                document.getElementById('auth-wrap').classList.add('hidden');
+                document.getElementById('dashboard').style.display = 'grid';
+                document.getElementById('admin-nav').classList.remove('hidden');
+            } else if (type === 'reg') {
+                alert("Kayıt talebi alındı! Kurucu onayı bekleniyor.");
             } else {
-                alert("Hatalı Giriş!");
+                alert("Hatalı kimlik bilgileri!");
             }
         }
 
-        function startApp() {
-            document.getElementById('auth-wrap').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'grid';
-            document.getElementById('user-mail').innerText = currentUser.email;
-            if(currentUser.rank === 'KURUCU') document.getElementById('admin-only').style.display = 'block';
+        function switchPage(pageId, el) {
+            document.querySelectorAll('.page-sec').forEach(p => p.classList.add('hidden'));
+            document.getElementById('page-' + pageId).classList.remove('hidden');
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
         }
 
-        function showPage(p) {
-            ['home', 'add', 'users'].forEach(page => {
-                document.getElementById('page-' + page).style.display = 'none';
-            });
-            document.getElementById('page-' + p).style.display = 'block';
-        }
+        function createNewServer() {
+            const name = document.getElementById('in-srv-name').value;
+            const ip = document.getElementById('in-srv-ip').value;
+            const port = document.getElementById('in-srv-port').value;
+            const term = document.getElementById('term-out');
 
-        function addServer() {
-            const name = document.getElementById('srv-name').value;
-            const ip = document.getElementById('srv-ip').value;
-            const port = document.getElementById('srv-port').value;
-            
-            const srv = { name, ip, port, id: Date.now() };
-            servers.push(srv);
-            renderServers();
-            showPage('home');
-            alert(ip + " sunucusu için kalkan oluşturuldu!");
+            if(!name || !ip) return alert("Eksik bilgi!");
+
+            term.innerHTML += `<br>> [INFO] ${name} için tünel oluşturuluyor...`;
+            setTimeout(() => {
+                term.innerHTML += `<br>> <span style="color:var(--p)">[SUCCESS] ${ip}:${port} bağlantısı Node.js kalkanına bağlandı!</span>`;
+                servers.push({ name, ip, port });
+                renderServers();
+                document.getElementById('in-srv-name').value = "";
+            }, 1500);
         }
 
         function renderServers() {
-            const list = document.getElementById('server-list');
-            list.innerHTML = servers.map(s => `
-                <div class="server-card glass">
-                    <h3>${s.name}</h3>
-                    <p style="opacity:0.6">Hedef: ${s.ip}:${s.port}</p>
-                    <div style="margin: 15px 0;"><span class="status-dot"></span> <span style="color:#3fb950">CALISIYOR</span></div>
-                    <p style="font-size:11px; color:var(--p)">Korumalı IP: Senin_VDS_IP:25577</p>
+            const container = document.getElementById('srv-list-container');
+            container.innerHTML = servers.map(s => `
+                <div class="card">
+                    <div class="status-badge"><i class="fas fa-shield-alt"></i> KORUNUYOR</div>
+                    <h3 style="margin: 15px 0 5px 0;">${s.name}</h3>
+                    <p style="color: #8b949e; font-size: 13px;">Hedef: ${s.ip}:${s.port}</p>
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                        <span style="font-size: 11px; color: var(--green);">Bağlantı: Stabil</span>
+                        <button class="btn" style="padding: 8px; margin-top: 10px; font-size: 11px; background: var(--red); color: white;">Korumayı Durdur</button>
+                    </div>
                 </div>
-            `).join('');
-        }
-
-        function loadUsers() {
-            showPage('users');
-            const body = document.getElementById('user-table-body');
-            // Örnek kullanıcılar (Backend'den çekilecek)
-            const mockUsers = [
-                {email: 'triggerbaba31@gmail.com', rank: 'KURUCU'},
-                {email: 'oyuncu123@gmail.com', rank: 'OYUNCU'}
-            ];
-            body.innerHTML = mockUsers.map(u => `
-                <tr>
-                    <td>${u.email}</td>
-                    <td><span class="rank-badge ${u.rank === 'KURUCU' ? 'rank-kurucu' : ''}">${u.rank}</span></td>
-                    <td><button style="color:var(--p); background:none; border:none; cursor:pointer;">Yetki Ver</button></td>
-                </tr>
             `).join('');
         }
     </script>
