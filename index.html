@@ -2,120 +2,176 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>TriggerGuard v2 | Ultimate Defense</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>TriggerGuard OS | Advanced Protection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg: #0b0e14; --card: #151921; --accent: #00d2ff; --gold: #ffd700; --red: #ff4d4d; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; }
-        .hidden { display: none !important; }
+        :root { --p: #00f2ff; --s: #0066ff; --bg: #05070a; --card: rgba(255,255,255,0.05); }
+        body { margin:0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; overflow: hidden; }
+        .glass { background: var(--card); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; }
         
-        /* UI Tasarımı */
-        .container { display: flex; height: 100vh; }
-        .sidebar { width: 280px; background: var(--card); padding: 20px; border-right: 1px solid #222; }
-        .main { flex: 1; padding: 40px; overflow-y: auto; }
-        
-        /* Kartlar ve Elemanlar */
-        .card { background: #1c222d; padding: 20px; border-radius: 12px; border-left: 5px solid var(--accent); margin-bottom: 20px; }
-        .btn { padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-primary { background: var(--accent); color: #000; }
-        .btn-danger { background: var(--red); color: white; }
+        /* GİRİŞ EKRANI */
+        #auth-wrap { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #101520, #05070a); }
+        .auth-card { padding: 40px; width: 400px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: rgba(0,0,0,0.3); border: 1px solid #333; color: white; border-radius: 8px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: linear-gradient(90deg, var(--p), var(--s)); color: #000; transition: 0.3s; }
+        .btn:hover { box-shadow: 0 0 20px rgba(0,242,255,0.5); transform: translateY(-2px); }
 
-        /* Login/Register Form */
-        #auth-page { height: 100vh; display: flex; align-items: center; justify-content: center; background: #080a0f; }
-        .auth-box { background: var(--card); padding: 40px; border-radius: 15px; width: 400px; text-align: center; border: 1px solid #333; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #080a0f; border: 1px solid #444; color: white; border-radius: 6px; }
+        /* ANA PANEL */
+        #dashboard { display: grid; grid-template-columns: 260px 1fr; height: 100vh; display: none; }
+        .sidebar { padding: 30px; border-right: 1px solid rgba(255,255,255,0.1); }
+        .content { padding: 40px; overflow-y: auto; }
+        
+        .nav-link { padding: 15px; margin: 10px 0; cursor: pointer; border-radius: 10px; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .nav-link:hover, .active { background: rgba(0,242,255,0.1); color: var(--p); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .server-card { padding: 20px; position: relative; overflow: hidden; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: #3fb950; margin-right: 5px; }
+
+        /* KURUCU PANELİ */
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .admin-table th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .rank-badge { padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; }
+        .rank-kurucu { background: #ffd700; color: #000; }
     </style>
 </head>
 <body>
 
-    <div id="auth-page">
-        <div class="auth-box">
-            <h1 id="auth-title">TRIGGERGUARD</h1>
-            <div id="login-form">
-                <input type="email" id="email" placeholder="E-posta">
+    <div id="auth-wrap">
+        <div class="auth-card glass">
+            <h1 style="color:var(--p); letter-spacing: 4px;">TRIGGERGUARD</h1>
+            <p id="auth-mode-text">Sistem Güvenlik Girişi</p>
+            <div id="auth-inputs">
+                <input type="email" id="email" placeholder="E-posta Adresi">
                 <input type="password" id="pass" placeholder="Şifre">
-                <button class="btn btn-primary" style="width:100%" onclick="handleLogin()">GİRİŞ YAP</button>
-                <p onclick="toggleAuth()">Hesabın yok mu? Kayıt Ol</p>
+                <button class="btn" onclick="login()">SİSTEME BAĞLAN</button>
             </div>
-            <div id="register-form" class="hidden">
-                <input type="email" id="reg-email" placeholder="E-posta">
-                <input type="password" id="reg-pass" placeholder="Yeni Şifre">
-                <button class="btn btn-primary" style="width:100%" onclick="handleRegister()">KAYIT OL</button>
-                <p onclick="toggleAuth()">Zaten hesabın var mı? Giriş Yap</p>
-            </div>
+            <p style="font-size: 12px; margin-top: 20px; cursor: pointer; opacity: 0.5;" onclick="toggleAuth()">Hesap Oluştur / Giriş Yap</p>
         </div>
     </div>
 
-    <div id="app" class="hidden container">
-        <div class="sidebar">
-            <h2 id="user-role-display" style="color:var(--gold)">--</h2>
-            <p id="user-mail-display" style="font-size:12px; opacity:0.6"></p>
-            <hr border="1" color="#333">
-            <div class="nav-item" onclick="showSection('home')">Dashboard</div>
-            <div id="admin-menu" class="hidden">
-                <h3 style="color:var(--red); font-size:14px; margin-top:30px;">KURUCU ÖZEL</h3>
-                <div class="nav-item" onclick="fetchUsers()">Kullanıcı Listesi</div>
-                <div class="nav-item" onclick="showSection('settings')">Sistem Ayarları</div>
+    <div id="dashboard">
+        <div class="sidebar glass">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <div id="user-rank" class="rank-badge rank-kurucu">KURUCU</div>
+                <p id="user-mail" style="font-size: 12px; margin-top: 10px;"></p>
             </div>
-            <button class="btn btn-danger" style="margin-top:50px" onclick="location.reload()">ÇIKIŞ</button>
+            <div class="nav-link active" onclick="showPage('home')"><i class="fas fa-server"></i> Sunucularım</div>
+            <div class="nav-link" onclick="showPage('add')"><i class="fas fa-plus-circle"></i> Sunucu Ekle</div>
+            <div id="admin-only" class="hidden" style="display:none;">
+                <div class="nav-link" onclick="loadUsers()"><i class="fas fa-users-cog"></i> Kullanıcı Yönetimi</div>
+            </div>
+            <div class="nav-link" style="margin-top: 50px; color: #ff4d4d;" onclick="location.reload()"><i class="fas fa-power-off"></i> Bağlantıyı Kes</div>
         </div>
 
-        <div class="main">
-            <div id="home-sec">
-                <h1>Sistem Durumu</h1>
-                <div class="card">
-                    <h3>Sunucu IP: <span id="mc-ip" style="color:var(--accent)">127.0.0.1</span></h3>
-                    <p>Korumalı Port: <b>25577</b></p>
-                    <div id="shield-status" style="color:var(--green)">DURUM: AKTİF</div>
+        <div class="content">
+            <div id="page-home">
+                <h1 style="display: flex; justify-content: space-between;">
+                    Aktif Korumalar 
+                    <span style="font-size: 14px; color: var(--p);">Port: 25577</span>
+                </h1>
+                <div class="grid" id="server-list">
+                    <div class="server-card glass">
+                        <h3>Örnek Sunucu</h3>
+                        <p>IP: 1.2.3.4:25565</p>
+                        <span class="status-dot"></span> <span style="color:#3fb950">KORUMA AKTİF</span>
+                        <button class="btn" style="margin-top: 15px; background: #ff4d4d; color: white;">DURDUR</button>
+                    </div>
                 </div>
             </div>
 
-            <div id="admin-sec" class="hidden">
-                <h1>Tüm Kayıtlı Kullanıcılar</h1>
-                <div id="user-list-container"></div>
+            <div id="page-add" style="display:none;">
+                <h1>Yeni Sunucu Koru</h1>
+                <div class="glass" style="padding: 30px; max-width: 500px;">
+                    <input type="text" id="srv-name" placeholder="Sunucu Adı (Örn: Survival)">
+                    <input type="text" id="srv-ip" placeholder="Hedef IP (Örn: 185.xx.xx.xx)">
+                    <input type="text" id="srv-port" placeholder="Hedef Port (Örn: 25565)">
+                    <button class="btn" onclick="addServer()">LİSTEYE EKLE VE KORU</button>
+                </div>
+            </div>
+
+            <div id="page-users" style="display:none;">
+                <h1>Kayıtlı Kullanıcılar (Kurucu Paneli)</h1>
+                <div class="glass">
+                    <table class="admin-table">
+                        <thead><tr><th>E-posta</th><th>Rütbe</th><th>İşlem</th></tr></thead>
+                        <tbody id="user-table-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         let currentUser = null;
-        const API = "http://localhost:3000/api";
+        let servers = [];
 
-        function toggleAuth() {
-            document.getElementById('login-form').classList.toggle('hidden');
-            document.getElementById('register-form').classList.toggle('hidden');
-        }
-
-        async function handleLogin() {
-            const mail = document.getElementById('email').value;
+        function login() {
+            const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
-            // API'ye bağlan (VDS ise IP yaz)
-            if(mail === 'triggerbaba31@gmail.com' && pass === 'trigger3163') {
-                currentUser = { mail, role: 'KURUCU' };
-                loadApp();
+
+            // TriggerBaba kontrolü
+            if(email === 'triggerbaba31@gmail.com' && pass === 'trigger3163') {
+                currentUser = { email, rank: 'KURUCU' };
+                startApp();
             } else {
-                alert("Giriş bilgileri hatalı!");
+                alert("Hatalı Giriş!");
             }
         }
 
-        function loadApp() {
-            document.getElementById('auth-page').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            document.getElementById('user-role-display').innerText = currentUser.role;
-            document.getElementById('user-mail-display').innerText = currentUser.mail;
+        function startApp() {
+            document.getElementById('auth-wrap').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'grid';
+            document.getElementById('user-mail').innerText = currentUser.email;
+            if(currentUser.rank === 'KURUCU') document.getElementById('admin-only').style.display = 'block';
+        }
+
+        function showPage(p) {
+            ['home', 'add', 'users'].forEach(page => {
+                document.getElementById('page-' + page).style.display = 'none';
+            });
+            document.getElementById('page-' + p).style.display = 'block';
+        }
+
+        function addServer() {
+            const name = document.getElementById('srv-name').value;
+            const ip = document.getElementById('srv-ip').value;
+            const port = document.getElementById('srv-port').value;
             
-            if(currentUser.role === 'KURUCU') {
-                document.getElementById('admin-menu').classList.remove('hidden');
-            }
+            const srv = { name, ip, port, id: Date.now() };
+            servers.push(srv);
+            renderServers();
+            showPage('home');
+            alert(ip + " sunucusu için kalkan oluşturuldu!");
         }
 
-        async function fetchUsers() {
-            // Burası API'den kullanıcı listesini çeker
-            document.getElementById('home-sec').classList.add('hidden');
-            document.getElementById('admin-sec').classList.remove('hidden');
-            const container = document.getElementById('user-list-container');
-            container.innerHTML = "Lütfen bekleyin, veriler çekiliyor...";
-            // Gerçek API'de burası fetch ile dolar
+        function renderServers() {
+            const list = document.getElementById('server-list');
+            list.innerHTML = servers.map(s => `
+                <div class="server-card glass">
+                    <h3>${s.name}</h3>
+                    <p style="opacity:0.6">Hedef: ${s.ip}:${s.port}</p>
+                    <div style="margin: 15px 0;"><span class="status-dot"></span> <span style="color:#3fb950">CALISIYOR</span></div>
+                    <p style="font-size:11px; color:var(--p)">Korumalı IP: Senin_VDS_IP:25577</p>
+                </div>
+            `).join('');
+        }
+
+        function loadUsers() {
+            showPage('users');
+            const body = document.getElementById('user-table-body');
+            // Örnek kullanıcılar (Backend'den çekilecek)
+            const mockUsers = [
+                {email: 'triggerbaba31@gmail.com', rank: 'KURUCU'},
+                {email: 'oyuncu123@gmail.com', rank: 'OYUNCU'}
+            ];
+            body.innerHTML = mockUsers.map(u => `
+                <tr>
+                    <td>${u.email}</td>
+                    <td><span class="rank-badge ${u.rank === 'KURUCU' ? 'rank-kurucu' : ''}">${u.rank}</span></td>
+                    <td><button style="color:var(--p); background:none; border:none; cursor:pointer;">Yetki Ver</button></td>
+                </tr>
+            `).join('');
         }
     </script>
 </body>
