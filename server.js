@@ -1,53 +1,39 @@
 const net = require('net');
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-
-// --- SİSTEM AYARLARI ---
-const MC_CONFIG = {
-    IP: '127.0.0.1', // Buraya korumak istediğin sunucu IP'sini yaz
-    PORT: 25565,
-    SHIELD_PORT: 25577
-};
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// --- VERİTABANI (Basit JSON Mantığı) ---
-let users = [
-    { mail: 'triggerbaba31@gmail.com', pass: 'trigger3163', role: 'KURUCU' }
-];
-let blackList = new Set();
-let isShieldActive = true;
+// --- CONFIG ---
+const API_PORT = 3000;
+const SHIELD_PORT = 25707; // Oyuncuların gireceği port
+let TARGET_MC_IP = '127.0.0.1';
+let TARGET_MC_PORT = 25565;
 
-// --- API: KAYIT VE YETKİ ---
-app.post('/api/register', (req, res) => {
-    const { mail, pass } = req.body;
-    if (users.find(u => u.mail === mail)) return res.json({ success: false, msg: "Bu mail zaten kayıtlı!" });
-    
-    users.push({ mail, pass, role: 'OYUNCU' });
-    res.json({ success: true, msg: "Kayıt başarılı! Admin onayından sonra panel açılır." });
-});
-
-app.post('/api/login', (req, res) => {
-    const { mail, pass } = req.body;
-    const user = users.find(u => u.mail === mail && u.pass === pass);
-    if (user) res.json({ success: true, user });
-    else res.status(401).json({ success: false });
-});
-
-// Kurucuya özel: Tüm kullanıcıları görme
-app.get('/api/admin/users', (req, res) => {
-    const adminMail = req.headers['admin-mail'];
-    const admin = users.find(u => u.mail === adminMail && u.role === 'KURUCU');
-    if (admin) res.json(users);
-    else res.status(403).send("Yetkin yok!");
-});
-
-// --- SHIELD KORUMA MOTORU ---
+// --- SHIELD ENGINE ---
 const shield = net.createServer((client) => {
-    if (!isShieldActive || blackList.has(client.remoteAddress)) return client.destroy();
+    // Basit TCP Flood Koruması
+    client.on('error', () => client.destroy());
 
-    const target = net.createConnection(MC_CONFIG.PORT, MC_CONFIG.IP, () => {
-        
+    const target = net.createConnection(TARGET_MC_PORT, TARGET_MC_IP, () => {
+        client.pipe(target);
+        target.pipe(client);
+    });
+
+    target.on('error', () => client.destroy());
+    client.on('timeout', () => client.destroy());
+});
+
+// --- API ENDPOINTS ---
+app.post('/api/shield/config', (req, res) => {
+    const { ip, port } = req.body;
+    TARGET_MC_IP = ip;
+    TARGET_MC_PORT = port;
+    console.log(`[SHIELD] Yeni Hedef: ${ip}:${port}`);
+    res.json({ success: true });
+});
+
+shield.listen(SHIELD_PORT, () => console.log(`[SHIELD] Korumalı Port Aktif: ${SHIELD_PORT}`));
+app.listen(API_PORT, () => console.log(`[CRM-API] Dashboard API Aktif: ${API_PORT}`));
