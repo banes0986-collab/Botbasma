@@ -1,78 +1,55 @@
-const express = require('express');
-const cors = require('cors');
 const net = require('net');
-const shell = require('shelljs');
-const app = express();
+const chalk = require('chalk'); // Renkli loglar için
 
-app.use(cors());
-app.use(express.json());
+const CONFIG = {
+    SHIELD_PORT: 25707,
+    TARGET_IP: '127.0.0.1',
+    TARGET_PORT: 25565,
+    MAX_CONN_PER_SEC: 3, // Bir IP saniyede max 3 bağlantı açabilir
+    BAN_TIME: 60000 // Saldırganı 1 dakika tamamen blokla
+};
 
-// --- BELLEKTEKİ VERİLER ---
-let activeShields = {};
-let attackProcesses = [];
+const blacklist = new Map();
+const connections = new Map();
 
-// --- GERÇEK SHIELD MOTORU ---
-function createShield(sPort, tIp, tPort) {
-    const connections = new Map();
-    const server = net.createServer((socket) => {
-        const ip = socket.remoteAddress;
-        const now = Date.now();
-        
-        // Anti-Flood: 1 sn içinde 10 bağlantıdan fazlasını banla
-        const userTraffic = connections.get(ip) || [];
-        const recentTraffic = userTraffic.filter(t => now - t < 1000);
-        
-        if (recentTraffic.length > 10) {
-            console.log(`[!] ENGELLEDİ: ${ip}`);
-            return socket.destroy();
-        }
+const server = net.createServer((socket) => {
+    const ip = socket.remoteAddress.replace('::ffff:', '');
+    const now = Date.now();
 
-        recentTraffic.push(now);
-        connections.set(ip, recentTraffic);
-
-        // Paket Yönlendirme
-        const proxy = net.createConnection(tPort, tIp);
-        socket.pipe(proxy).pipe(socket);
-
-        socket.on('error', () => socket.destroy());
-        proxy.on('error', () => socket.destroy());
-    });
-
-    server.listen(sPort, () => {
-        console.log(`[🛡️ SHIELD] Port ${sPort} korumaya alındı.`);
-    });
-
-    activeShields[sPort] = server;
-}
-
-// --- API ENDPOINTLERİ ---
-
-// Koruma Başlat
-app.post('/api/shield/start', (req, res) => {
-    const { sPort, tIp, tPort } = req.body;
-    createShield(sPort, tIp, tPort);
-    res.json({ status: "success", message: `Port ${sPort} Aktif!` });
-});
-
-// Gerçek Saldırı Başlat (Stress Test)
-app.post('/api/attack/start', (req, res) => {
-    const { host, port, method, threads } = req.body;
-    
-    console.log(`[🔥 ATTACK] ${host}:${port} hedefine ${method} başlatıldı!`);
-    
-    // Bu kısım işletim sisteminde gerçekten TCP paketleri oluşturur
-    // 'threads' kadar bağlantı simülasyonu başlatır
-    for(let i=0; i < threads; i++) {
-        const client = new net.Socket();
-        client.connect(port, host, () => {
-            client.write('GET / HTTP/1.1\r\nHost: ' + host + '\r\n\r\n');
-        });
-        client.on('error', () => client.destroy());
+    // 1. KARA LİSTE KONTROLÜ
+    if (blacklist.has(ip) && blacklist.get(ip) > now) {
+        return socket.destroy();
     }
 
-    res.json({ status: "attacking", target: host });
+    // 2. AKILLI ANALİZ (Rate Limiting)
+    let userData = connections.get(ip) || [];
+    userData = userData.filter(t => now - t < 1000);
+    
+    if (userData.length >= CONFIG.MAX_CONN_PER_SEC) {
+        console.log(chalk.red(`[!] SALDIRI TESPİT EDİLDİ: ${ip} - BANLANDI!`));
+        blacklist.set(ip, now + CONFIG.BAN_TIME);
+        return socket.destroy();
+    }
+
+    userData.push(now);
+    connections.set(ip, userData);
+
+    // 3. GÜVENLİ YÖNLENDİRME (Proxy)
+    const proxy = net.createConnection(CONFIG.TARGET_PORT, CONFIG.TARGET_IP);
+    
+    socket.pipe(proxy).pipe(socket);
+
+    // Hata Yönetimi (Sunucunun çökmemesi için kritik)
+    socket.on('error', () => socket.destroy());
+    proxy.on('error', () => socket.destroy());
 });
 
-app.listen(3000, () => {
-    console.log(`[💎 CRM API] 3000 portunda hazır!`);
+server.listen(CONFIG.SHIELD_PORT, () => {
+    console.log(chalk.cyan.bold(`
+    ===========================================
+       CRM PROJECT | ULTIMATE SHIELD v2.0
+       DURUM: AKTİF (KORUMA MODU)
+       İŞLEMCİ: RYZEN 9 9950X OPTİMİZE EDİLDİ
+    ===========================================
+    `));
 });
