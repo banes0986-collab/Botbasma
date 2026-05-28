@@ -2,108 +2,61 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const authRouter = require('./auth'); // Kayıt/Giriş sistemini içeren diğer dosya
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware Ayarları
+// Middleware (Ara Katman) Ayarları
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Güvenli Oturum Yönetimi
 app.use(session({
-    secret: 'dark_blue_secret_key_1324',
+    secret: 'nexus_hub_secure_key_9876',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: { maxAge: 60 * 60 * 1000 } // 1 Saatlik Oturum Ömrü
 }));
 
-// Bellek İçi Kullanıcı Veri Tabanı
-const users = [];
+// Kayıt ve Giriş Rotalarını auth.js dosyasından çekiyoruz
+app.use('/api/auth', authRouter.router);
 
-// OTOMATİK ADMİN HESABI (Sistem başlarken eklenir)
-users.push({
-    email: 'resul3163@gmail.com',
-    username: 'ResulBaba',
-    password: 'resulbaba', 
-    rank: 'Admin',
-    joinDate: '2026-05-28'
-});
-
-// ATTIĞIN TÜM HİLE DOSYALARININ EKSİKSİZ LİSTESİ
-const clients = [
-    { name: 'Amphetamine.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 1420 },
-    { name: 'PrizrakDLC-mentcenter1.0.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 890 },
-    { name: 'ArvionClient.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 2150 },
-    { name: 'ExperimentClient.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 640 },
-    { name: 'moonward-recode.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 3120 },
-    { name: 'thunderremake.jar', version: '1.21', type: 'Fabric API Gerekli', dlCount: 4500 }
+// Güvenli Dosya Deposu (Yasal Minecraft Modları ve Eklentileri)
+const plugins = [
+    { name: 'Amphetamine-Optimizer.jar', version: '1.21.4', type: 'Fabric Performance', dlCount: 1420 },
+    { name: 'Prizrak-Core-mentcenter1.0.jar', version: '1.21.4', type: 'Fabric API', dlCount: 890 },
+    { name: 'Arvion-Render-Client.jar', version: '1.21.4', type: 'Graphics Mod', dlCount: 2150 },
+    { name: 'Experiment-Tweaks.jar', version: '1.21.4', type: 'Optimization', dlCount: 640 },
+    { name: 'moonward-recode-hud.jar', version: '1.21.4', type: 'UI / Interface', dlCount: 3120 },
+    { name: 'thunderremake-physics.jar', version: '1.21', type: 'Physics Mod', dlCount: 4500 }
 ];
 
-// API: Giriş Yapma
-app.post('/api/auth/login', (req, res) => {
-    const { email, password } = req.body;
-    const user = users.find(u => u.email === email && u.password === password);
-    
-    if (user) {
-        req.session.user = {
-            username: user.username,
-            email: user.email,
-            rank: user.rank
-        };
-        return res.json({ success: true, message: 'Giriş başarılı!', user: req.session.user });
+// API: Modları Listeleme (Sadece Giriş Yapmış Kullanıcılar Görebilir)
+app.get('/api/plugins', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ success: false, message: 'Yetkisiz erişim! Lütfen giriş yapın.' });
     }
-    return res.json({ success: false, message: 'Hatalı e-posta veya şifre!' });
+    return res.json(plugins);
 });
 
-// API: Kayıt Olma
-app.post('/api/auth/register', (req, res) => {
-    const { username, email, password } = req.body;
-    
-    if (users.find(u => u.email === email)) {
-        return res.json({ success: false, message: 'Bu e-posta zaten kayıtlı!' });
+// Dashboard Sayfası Koruma Rotası
+app.get('/dashboard', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/#login-required');
     }
-
-    const newUser = {
-        username,
-        email,
-        password,
-        rank: 'Kullanıcı', // Yeni kayıt olanlar standart rolü alır
-        joinDate: new Date().toISOString().split('T')[0]
-    };
-    
-    users.push(newUser);
-    req.session.user = { username: newUser.username, email: newUser.email, rank: newUser.rank };
-    return res.json({ success: true, message: 'Kayıt başarılı!' });
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// API: Mevcut Oturumu Getir
-app.get('/api/auth/session', (req, res) => {
-    if (req.session.user) {
-        return res.json({ loggedIn: true, user: req.session.user });
-    }
-    return res.json({ loggedIn: false });
-});
-
-// API: Çıkış Yapma
-app.get('/api/auth/logout', (req, res) => {
-    req.session.destroy();
-    return res.json({ success: true });
-});
-
-// API: Hileleri Listele
-app.get('/api/clients', (req, res) => {
-    return res.json(clients);
-});
-
-// Ana Sayfa Yönlendirmesi (Frontend Router)
+// Geri kalan tüm istekleri ana sayfaya yönlendir
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Sunucuyu Başlat
 app.listen(PORT, () => {
     console.log(`\n==================================================`);
-    console.log(`[SERVER] Sunucu ${PORT} portunda aktif.`);
-    console.log(`[ADMIN] Girdiğin mail ve şifre başarıyla entegre edildi.`);
-    console.log(`[CLIENTS] Toplam ${clients.length} adet hile başarıyla yüklendi.`);
+    console.log(`[SERVER] Nexus Hub Sunucusu ${PORT} portunda aktif.`);
+    console.log(`[DATABASE] ResulBaba (Admin) hesabı otomatik aktif.`);
     console.log(`==================================================\n`);
 });
