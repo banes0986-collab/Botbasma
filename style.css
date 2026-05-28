@@ -1,88 +1,325 @@
-/* TriggerGuard Professional Style 
-    Author: TriggerBaba
-*/
-
 :root {
-    --bg-dark: #0d1117;
-    --card-bg: #161b22;
-    --border-color: #30363d;
-    --accent-blue: #58a6ff;
-    --accent-green: #3fb950;
-    --accent-red: #f85149;
-    --neon-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+    --bg-main: #050b14;
+    --bg-surface: #0a1424;
+    --bg-surface-light: #112035;
+    --accent-blue: #0066ff;
+    --accent-glow: rgba(0, 102, 255, 0.3);
+    --text-main: #f0f4f9;
+    --text-muted: #798da3;
+    --rank-admin: #ff3333;
+    --rank-user: #00cc66;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: var(--bg-dark);
-    color: #c9d1d9;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    margin: 0;
+    background-color: var(--bg-main);
+    color: var(--text-main);
     overflow-x: hidden;
 }
 
-/* Giriş Ekranı Tasarımı */
-#login-screen {
-    background: radial-gradient(circle at center, #1c2128 0%, #0d1117 100%);
-    height: 100vh;
+/* Navigasyon Çubuğu Tasarımı */
+.navbar {
+    background: linear-gradient(180 Davies, var(--bg-surface) 0%, rgba(10,20,36,0.8) 100%);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 102, 255, 0.15);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+}
+
+.brand {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+.brand i {
+    color: var(--accent-blue);
+    margin-right: 8px;
+    filter: drop-shadow(0 0 8px var(--accent-blue));
+}
+
+.brand span {
+    color: var(--accent-blue);
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+
+.nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    color: var(--text-main);
+    text-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Giriş Alanı & Rank Rozetleri */
+.btn-login {
+    background: transparent;
+    border: 1px solid var(--accent-blue);
+    color: var(--text-main);
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-login:hover {
+    background: var(--accent-blue);
+    box-shadow: 0 0 15px var(--accent-glow);
+    transform: translateY(-2px);
+}
+
+.user-profile-badge {
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface-light);
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(250,250,250,0.05);
+    gap: 15px;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.u-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.u-rank {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rank-admin { color: var(--rank-admin); text-shadow: 0 0 8px rgba(255,51,51,0.4); }
+.rank-user { color: var(--rank-user); text-shadow: 0 0 8px rgba(0,204,102,0.4); }
+
+.logout-btn {
+    background: transparent;
+    border: none;
+    color: #ff4d4d;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.2s;
+}
+
+.logout-btn:hover { transform: scale(1.1); }
+
+/* Ana Sayfa Düzeni */
+.main-content {
+    max-width: 1200px;
+    margin: 120px auto 60px;
+    padding: 0 24px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.active-tab {
+    display: block;
+}
+
+.section-header {
+    margin-bottom: 40px;
+}
+
+.section-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.section-header p {
+    color: var(--text-muted);
+    font-size: 16px;
+}
+
+/* Hile Kartları Tasarımı */
+.client-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 25px;
+}
+
+.client-card {
+    background: var(--bg-surface);
+    border: 1px solid rgba(0, 102, 255, 0.08);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.client-card:hover {
+    border-color: rgba(0, 102, 255, 0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.client-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.version-badge, .api-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--bg-surface-light);
+}
+
+.version-badge { color: #ffb300; }
+.api-badge { color: #00b0ff; }
+
+.client-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    word-break: break-all;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(250,250,250,0.05);
+    padding-top: 15px;
+}
+
+.dl-count {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.download-action-btn {
+    background: var(--bg-surface-light);
+    border: 1px solid rgba(0, 102, 255, 0.2);
+    color: var(--text-main);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.download-action-btn:hover {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+/* Config Sayfası (Boş Durum) */
+.empty-state-card {
+    text-align: center;
+    padding: 60px;
+    background: var(--bg-surface);
+    border-radius: 12px;
+    border: 1px dashed rgba(250,250,250,0.1);
+}
+
+.empty-state-card i {
+    font-size: 40px;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+}
+
+/* Modal Sistemi */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(3, 7, 13, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
-.login-box {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
+.modal-box {
+    background: var(--bg-surface);
+    border: 1px solid rgba(0, 102, 255, 0.2);
     border-radius: 12px;
-    padding: 3rem;
-    width: 380px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-    animation: fadeIn 0.8s ease-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.login-box h2 {
-    color: var(--accent-blue);
-    font-size: 24px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 5px;
-}
-
-input {
     width: 100%;
-    background: #010409;
-    border: 1px solid var(--border-color);
-    color: white;
-    padding: 12px;
-    margin: 15px 0;
+    max-width: 420px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.close-btn {
+    background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px;
+}
+
+.auth-form .input-group {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.auth-form label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+.auth-form input {
+    background: var(--bg-surface-light);
+    border: 1px solid rgba(250,250,250,0.08);
+    padding: 10px 14px;
     border-radius: 6px;
+    color: var(--text-main);
     outline: none;
-    transition: 0.3s;
 }
 
-input:focus {
-    border-color: var(--accent-blue);
-    box-shadow: var(--neon-shadow);
+.auth-form input:focus { border-color: var(--accent-blue); }
+.btn-primary {
+    background: var(--accent-blue); border: none; color: white; padding: 12px; width: 100%; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px;
 }
 
-button {
-    background: linear-gradient(45deg, #1f6feb, #58a6ff);
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: 0.3s;
-}
-
-button:hover {
-    transform: scale(1.02);
-    box-shadow: 0
-    
+.form-switch { font-size: 13px; text-align: center; margin-top: 15px; color: var(--text-muted); }
+.form-switch a { color: var(--accent-blue); text-decoration: none; }
+.hidden { display: none !important; }
+        
