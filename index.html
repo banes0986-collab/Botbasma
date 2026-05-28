@@ -153,7 +153,7 @@
             <div class="auth-container">
                 <h2 id="formTitle">Sisteme Giriş Yap</h2>
                 
-                <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
+                <form id="loginForm">
                     <div class="input-field">
                         <label>E-Posta Adresiniz</label>
                         <input type="email" id="loginEmail" required placeholder="ornek@mail.com">
@@ -166,7 +166,7 @@
                     <p class="switch-text">Hesabınız yok mu? <span onclick="toggleForm('register')">Hemen Kayıt Ol</span></p>
                 </form>
 
-                <form id="registerForm" class="hidden" onsubmit="event.preventDefault(); handleRegister();">
+                <form id="registerForm" class="hidden">
                     <div class="input-field">
                         <label>Kullanıcı Adı</label>
                         <input type="text" id="regUsername" required placeholder="Oyundaki adınız">
@@ -192,7 +192,7 @@
             <div class="nav-container">
                 <div class="nav-left">
                     <button class="menu-toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-                    <a href="javascript:void(0)" class="brand"><i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span></a>
+                    <a href="#" class="brand"><i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span></a>
                 </div>
                 <div class="nav-right">
                     <div class="user-badge">
@@ -249,7 +249,7 @@
                 </div>
                 
                 <div class="rank-management-container">
-                    <form class="rank-form" onsubmit="event.preventDefault(); handleRankUpdate();">
+                    <form id="rankForm" class="rank-form">
                         <div class="form-group">
                             <label>İşlem Yapılacak Oyuncu</label>
                             <select id="rankUserSelect" required></select>
@@ -279,4 +279,12 @@
                             <tbody id="userTableBody"></tbody>
                         </table>
                     </div>
-               
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        /* --- VERİ TABANI & KURUCU HESABI --- */
+        function initDatabase() {
+     
