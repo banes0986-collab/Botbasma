@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Hub | Premium Minecraft Clients</title>
+    <title>Nexus Hub | Yönetim Paneli</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -14,6 +14,13 @@
             --accent-glow: rgba(0, 102, 255, 0.3);
             --text-main: #f0f4f9;
             --text-muted: #798da3;
+            
+            /* Rütbe Renkleri */
+            --color-kurucu: #ff3333;
+            --color-genelsorumlu: #ff33cc;
+            --color-admin: #ff9900;
+            --color-rehber: #00ccff;
+            --color-oyuncu: #00cc66;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -36,30 +43,49 @@
         .switch-text { font-size: 13px; text-align: center; margin-top: 15px; color: var(--text-muted); }
         .switch-text a { color: var(--accent-blue); text-decoration: none; font-weight: 600; }
 
-        /* Dashboard Ekranı */
-        .dashboard-page { display: none; }
-        .navbar { background: rgba(10, 20, 36, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0, 102, 255, 0.15); position: fixed; width: 100%; top: 0; z-index: 100; }
-        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 15px 24px; }
-        .brand { font-size: 20px; font-weight: 800; color: #fff; text-decoration: none; }
-        .brand span { color: var(--accent-blue); }
-        .brand i { color: var(--accent-blue); margin-right: 6px; }
-        .nav-links { display: flex; list-style: none; gap: 25px; }
-        .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .nav-links a:hover, .nav-links a.active { color: #fff; text-shadow: 0 0 8px var(--accent-glow); }
+        /* Dashboard Yapısı */
+        .dashboard-page { display: none; min-height: 100vh; position: relative; }
+        
+        /* Üst Bar */
+        .navbar { background: rgba(10, 20, 36, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0, 102, 255, 0.15); position: fixed; width: 100%; top: 0; z-index: 99; height: 70px; display: flex; align-items: center; }
+        .nav-container { width: 100%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 24px; }
+        .nav-left { display: flex; align-items: center; gap: 20px; }
+        .menu-toggle-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; transition: 0.2s; }
+        .menu-toggle-btn:hover { color: var(--accent-blue); }
+        
         .user-badge { display: flex; align-items: center; background: var(--bg-surface-light); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(250,250,250,0.05); gap: 12px; }
-        .u-info { display: flex; flex-direction: column; line-height: 1.2; }
-        .u-info span { font-size: 13px; font-weight: 600; }
-        .rank-tag { font-size: 11px !important; color: #00cc66; font-weight: 700; text-transform: uppercase; }
-        .admin-style { color: #ff3333 !important; text-shadow: 0 0 8px rgba(255,51,51,0.6); }
-        .power-btn { background: transparent; border: none; color: #ff4d4d; cursor: pointer; font-size: 14px; }
+        .u-info { display: flex; flex-direction: column; line-height: 1.2; text-align: right; }
+        .u-info .u-name { font-size: 14px; font-weight: 600; }
+        .rank-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); width: max-content; align-self: flex-end; }
+        
+        /* Rütbe Tasarımları */
+        .rank-kurucu { color: var(--color-kurucu); border: 1px solid var(--color-kurucu); }
+        .rank-genelsorumlu { color: var(--color-genelsorumlu); border: 1px solid var(--color-genelsorumlu); }
+        .rank-admin { color: var(--color-admin); border: 1px solid var(--color-admin); }
+        .rank-rehber { color: var(--color-rehber); border: 1px solid var(--color-rehber); }
+        .rank-oyuncu { color: var(--color-oyuncu); border: 1px solid var(--color-oyuncu); }
 
-        /* Grid Sistemi */
-        .main-content { max-width: 1200px; margin: 110px auto 40px; padding: 0 24px; }
+        /* 3 Çizgili Yan Menü (Sidebar) */
+        .sidebar { position: fixed; top: 70px; left: -260px; width: 260px; height: calc(100vh - 70px); background: var(--bg-surface); border-right: 1px solid rgba(0, 102, 255, 0.15); z-index: 100; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px 0; }
+        .sidebar.open { left: 0; }
+        .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 5px; padding: 0 10px; }
+        .sidebar-menu li a { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 15px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .sidebar-menu li a:hover, .sidebar-menu li a.active { color: #fff; background: var(--bg-surface-light); border-left: 4px solid var(--accent-blue); }
+        .sidebar-menu li a.logout-link { color: #ff4d4d; margin-top: 20px; }
+        .sidebar-menu li a.logout-link:hover { background: rgba(255, 77, 77, 0.1); }
+
+        /* İçerik Alanı */
+        .main-content { margin-top: 70px; padding: 40px 24px; transition: all 0.3s ease; max-width: 1200px; margin-left: auto; margin-right: auto; }
+        .main-content.shifted { margin-left: calc((100vw - 1200px) / 2 + 260px); }
+        @media (max-width: 1200px) { .main-content.shifted { margin-left: 260px; } }
+
         .tab-content { display: none; }
         .active-tab { display: block; }
         .section-header { margin-bottom: 30px; }
         .section-header h1 { font-size: 28px; margin-bottom: 6px; }
         .section-header p { color: var(--text-muted); font-size: 15px; }
+
+        /* Grid & Kart Yapısı */
         .client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
         .client-card { background: var(--bg-surface); border: 1px solid rgba(0, 102, 255, 0.08); border-radius: 10px; padding: 20px; transition: 0.2s; }
         .client-card:hover { border-color: rgba(0, 102, 255, 0.25); transform: translateY(-3px); }
@@ -72,6 +98,23 @@
         .dl-count { font-size: 12px; color: var(--text-muted); }
         .download-action-btn { background: var(--bg-surface-light); border: 1px solid rgba(0, 102, 255, 0.2); color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: 600; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; }
         .download-action-btn:hover { background: var(--accent-blue); }
+
+        /* Rütbe Verme Paneli (Sadece Kurucuya Özel) */
+        .rank-management-container { background: var(--bg-surface); border: 1px solid rgba(0, 102, 255, 0.15); border-radius: 10px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        .rank-form { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid rgba(250,250,250,0.05); padding-bottom: 25px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+        .form-group label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+        .form-group select, .form-group input { background: var(--bg-surface-light); border: 1px solid rgba(250,250,250,0.05); padding: 11px; border-radius: 6px; color: #fff; outline: none; font-weight: 600; }
+        .btn-update { background: #00cc66; color: white; border: none; padding: 11px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; height: 41px; transition: 0.2s; }
+        .btn-update:hover { background: #00aa55; box-shadow: 0 0 10px rgba(0, 204, 102, 0.3); }
+
+        /* Oyuncu Listesi Tablosu */
+        .user-table-wrapper { overflow-x: auto; }
+        .user-table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px; }
+        .user-table th { background: var(--bg-surface-light); padding: 12px 15px; font-size: 14px; font-weight: 700; color: var(--text-muted); }
+        .user-table td { padding: 12px 15px; border-bottom: 1px solid rgba(250,250,250,0.05); font-size: 14px; }
+        .user-table tr:hover td { background: rgba(250,250,250,0.01); }
+
         .empty-card { text-align: center; padding: 50px; background: var(--bg-surface); border-radius: 10px; border: 1px dashed rgba(250,250,250,0.1); }
         .empty-card i { font-size: 32px; color: var(--text-muted); margin-bottom: 10px; }
         .hidden { display: none !important; }
@@ -122,62 +165,110 @@
     </div>
 
     <div id="dashboardPage" class="dashboard-page">
+        
         <nav class="navbar">
             <div class="nav-container">
-                <a href="#" class="brand"><i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span></a>
-                <ul class="nav-links">
-                    <li><a class="active" id="nav-explore" onclick="switchTab('explore')"><i class="fa-solid fa-compass"></i> Hile Clientleri</a></li>
-                    <li><a id="nav-configs" onclick="switchTab('configs')"><i class="fa-solid fa-sliders"></i> Configler</a></li>
-                </ul>
+                <div class="nav-left">
+                    <button class="menu-toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                    <a href="#" class="brand"><i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span></a>
+                </div>
                 <div class="user-badge">
                     <div class="u-info">
-                        <span id="displayUsername">User</span>
-                        <span id="displayRank" class="rank-tag">Kullanıcı</span>
+                        <span id="displayUsername" class="u-name">User</span>
+                        <span id="displayRank" class="rank-tag">Oyuncu</span>
                     </div>
-                    <button onclick="logout()" class="power-btn" title="Çıkış Yap"><i class="fa-solid fa-power-off"></i></button>
                 </div>
             </div>
         </nav>
 
-        <main class="main-content">
+        <aside id="sidebar" class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a class="active" id="nav-explore" onclick="switchTab('explore')"><i class="fa-solid fa-compass"></i> Hile Clientleri</a></li>
+                <li><a id="nav-configs" onclick="switchTab('configs')"><i class="fa-solid fa-sliders"></i> Configler</a></li>
+                <li id="sidebar-rank-mgmt" class="hidden"><a id="nav-ranks" onclick="switchTab('ranks')"><i class="fa-solid fa-user-gear"></i> Rütbe Yönetimi</a></li>
+                <li><a onclick="logout()" class="logout-link"><i class="fa-solid fa-power-off"></i> Çıkış Yap (Log Out)</a></li>
+            </ul>
+        </aside>
+
+        <main id="mainContent" class="main-content">
+            
             <section id="explore-tab" class="tab-content active-tab">
                 <div class="section-header">
                     <h1>Minecraft Hile Dosyaları</h1>
-                    <p>Attığın tüm .jar dosyaları eksiksiz listelenmiştir. İndirme butonları aktiftir.</p>
+                    <p>Attığın tüm hile dosyaları aşağıdadır. İndir butonuna bastığında tarayıcın dosyayı doğrudan indirir.</p>
                 </div>
-                
-                <div class="client-grid" id="itemsGrid">
-                    </div>
+                <div class="client-grid" id="itemsGrid"></div>
             </section>
 
             <section id="configs-tab" class="tab-content">
                 <div class="section-header">
                     <h1>Kullanıcı Config Ayarları</h1>
-                    <p>Hileler için en iyi bypass ve optimize ayar dosyaları.</p>
+                    <p>Sunucular ve hile istemcileri için en stabilize bypass ve optimize ayar dosyaları.</p>
                 </div>
                 <div class="empty-card">
                     <i class="fa-solid fa-hourglass-half"></i>
                     <h3>Çok Yakında...</h3>
-                    <p>Bu alan için özel bypass config dosyaları hazırlanıyor. Takipte kalın.</p>
+                    <p>Bypass ve optimize ayarları çok yakında buraya yüklenecektir. Takipte kalın.</p>
                 </div>
             </section>
+
+            <section id="ranks-tab" class="tab-content">
+                <div class="section-header">
+                    <h1>Kurucu Yönetim Paneli</h1>
+                    <p>Sistemdeki tüm kayıtlı kullanıcıları görebilir ve rütbelerini (Kurucu, Genel Sorumlu, Admin, Rehber, Oyuncu) değiştirebilirsin.</p>
+                </div>
+                
+                <div class="rank-management-container">
+                    <form class="rank-form" onsubmit="handleRankUpdate(event)">
+                        <div class="form-group">
+                            <label>Kullanıcı Seç</label>
+                            <select id="rankUserSelect" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Verilecek Rütbe</label>
+                            <select id="rankRoleSelect" required>
+                                <option value="Kurucu">Kurucu</option>
+                                <option value="Genel Sorumlu">Genel Sorumlu</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Rehber">Rehber</option>
+                                <option value="Oyuncu">Oyuncu</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-update">Rütbeyi Güncelle</button>
+                    </form>
+
+                    <div class="user-table-wrapper">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>Kullanıcı Adı</th>
+                                    <th>E-Posta</th>
+                                    <th>Mevcut Rütbe</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
 
     <script>
-        // Tarayıcı hafızasında sanal veri tabanı oluşturuyoruz
-        if (!localStorage.getItem('users')) {
-            // İstediğin otomatik Admin hesabı ilk açılışta yüklenir
-            const defaultUsers = [{
-                email: 'resul3163@gmail.com',
-                username: 'ResulBaba',
-                password: 'resulbaba',
-                rank: 'Admin'
+        // SANAL VERİ TABANI AYARI (Tarayıcı hafızası)
+        if (!localStorage.getItem('nexus_users')) {
+            // Talep ettiğin Kurucu hesabı otomatik tanımlanıyor
+            const initialUsers = [{
+                email: 'triggerbaba31@gmail.com',
+                username: 'TriggerBaba',
+                password: 'triggerbabaa',
+                rank: 'Kurucu'
             }];
-            localStorage.setItem('users', JSON.stringify(defaultUsers));
+            localStorage.setItem('nexus_users', JSON.stringify(initialUsers));
         }
 
-        // İstediğin Eksiksiz Hile Listesi
+        // Gönderdiğin Hile Dosyalarının Tam Listesi
         const clients = [
             { name: 'Amphetamine.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 1420 },
             { name: 'PrizrakDLC-mentcenter1.0.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 890 },
@@ -187,7 +278,9 @@
             { name: 'thunderremake.jar', version: '1.21', type: 'Fabric API Gerekli', dlCount: 4500 }
         ];
 
-        // Giriş ve Kayıt Form Geçişleri
+        let loggedInUser = null;
+
+        // Form Geçişleri (Giriş / Kayıt)
         function toggleForm(type) {
             if (type === 'register') {
                 document.getElementById('loginForm').classList.add('hidden');
@@ -200,98 +293,42 @@
             }
         }
 
+        // 3 Çizgili Menü Aç/Kapat Kontrolü
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('shifted');
+        }
+
         // Sekme Değiştirici
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
-            document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu a').forEach(el => el.classList.remove('active'));
             
             document.getElementById(tabName + '-tab').classList.add('active-tab');
             document.getElementById('nav-' + tabName).classList.add('active');
+            
+            // Mobilde menüyü otomatik kapatmak için
+            if(window.innerWidth < 1200) {
+                toggleSidebar();
+            }
         }
 
-        // Kayıt Olma Fonksiyonu
+        // KAYIT SİSTEMİ (Yeni oyuncular otomatik 'Oyuncu' olur)
         function handleRegister(e) {
             e.preventDefault();
             const username = document.getElementById('regUsername').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
 
-            let currentUsers = JSON.parse(localStorage.getItem('users'));
+            let users = JSON.parse(localStorage.getItem('nexus_users'));
 
-            if (currentUsers.find(u => u.email === email)) {
-                alert('Bu e-posta zaten kayıtlı!');
+            if (users.find(u => u.email === email)) {
+                alert('Bu e-posta adresi zaten kayıtlı!');
                 return;
             }
 
-            const newUser = { username, email, password, rank: 'Kullanıcı' };
-            currentUsers.push(newUser);
-            localStorage.setItem('users', JSON.stringify(currentUsers));
-
-            alert('Hesabınız başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.');
-            document.getElementById('registerForm').reset();
-            toggleForm('login');
-        }
-
-        // Giriş Yapma Fonksiyonu
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            const currentUsers = JSON.parse(localStorage.getItem('users'));
-            const user = currentUsers.find(u => u.email === email && u.password === password);
-
-            if (user) {
-                // Giriş Başarılı, sayfayı Dashboard'a çevir
-                document.getElementById('authPage').style.display = 'none';
-                document.getElementById('dashboardPage').style.display = 'block';
-
-                // Bilgileri ekrana bas
-                document.getElementById('displayUsername').innerText = user.username;
-                const rankEl = document.getElementById('displayRank');
-                rankEl.innerText = user.rank;
-
-                if (user.rank === 'Admin') {
-                    rankEl.classList.add('admin-style');
-                } else {
-                    rankEl.classList.remove('admin-style');
-                }
-
-                loadDashboardItems();
-            } else {
-                alert('Hatalı e-posta veya şifre girdiniz!');
-            }
-        }
-
-        // Hile Kartlarını Listeleme
-        function loadDashboardItems() {
-            const grid = document.getElementById('itemsGrid');
-            grid.innerHTML = '';
-
-            clients.forEach(client => {
-                grid.innerHTML += `
-                    <div class="client-card">
-                        <div class="client-meta">
-                            <span class="version-badge"><i class="fa-solid fa-code-branch"></i> MC ${client.version}</span>
-                            <span class="api-badge"><i class="fa-solid fa-cubes"></i> ${client.type}</span>
-                        </div>
-                        <h2 class="client-title">${client.name}</h2>
-                        <div class="card-footer">
-                            <span class="dl-count"><i class="fa-solid fa-download"></i> ${client.dlCount} indirme</span>
-                            <a href="${client.name}" download class="download-action-btn"><i class="fa-solid fa-arrow-down-to-line"></i> İndir</a>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // Çıkış Yapma
-        function logout() {
-            document.getElementById('loginForm').reset();
-            document.getElementById('dashboardPage').style.display = 'none';
-            document.getElementById('authPage').style.display = 'flex';
-            toggleForm('login');
-        }
-    </script>
-</body>
-</html>
+            // OTOMATİK OYUNCU ROLÜ VERİLİR VE KAYDEDİLİR
+            const newPlayer = { username, email, password, rank: 'Oyuncu' };
+            u
