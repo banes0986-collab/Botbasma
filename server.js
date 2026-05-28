@@ -19,16 +19,16 @@ app.use(session({
 // Bellek İçi Kullanıcı Veri Tabanı
 const users = [];
 
-// İSTEDİĞİN OTOMATİK HESAP (Sistem başlarken eklenir)
+// OTOMATİK ADMİN HESABI (Sistem başlarken eklenir)
 users.push({
     email: 'resul3163@gmail.com',
     username: 'ResulBaba',
-    password: 'resulbaba', // Gerçek projelerde hashlenmelidir
+    password: 'resulbaba', 
     rank: 'Admin',
     joinDate: '2026-05-28'
 });
 
-// Mock Veriler (Hileler ve Sürümleri)
+// ATTIĞIN TÜM HİLE DOSYALARININ EKSİKSİZ LİSTESİ
 const clients = [
     { name: 'Amphetamine.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 1420 },
     { name: 'PrizrakDLC-mentcenter1.0.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 890 },
@@ -39,7 +39,7 @@ const clients = [
 ];
 
 // API: Giriş Yapma
-app.post('/api/auth/login', (req, requireResponse) => {
+app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;
     const user = users.find(u => u.email === email && u.password === password);
     
@@ -49,58 +49,61 @@ app.post('/api/auth/login', (req, requireResponse) => {
             email: user.email,
             rank: user.rank
         };
-        return requireResponse.json({ success: true, message: 'Giriş başarılı!', user: req.session.user });
+        return res.json({ success: true, message: 'Giriş başarılı!', user: req.session.user });
     }
-    return requireResponse.json({ success: false, message: 'Hatalı e-posta veya şifre!' });
+    return res.json({ success: false, message: 'Hatalı e-posta veya şifre!' });
 });
 
 // API: Kayıt Olma
-app.post('/api/auth/register', (req, requireResponse) => {
+app.post('/api/auth/register', (req, res) => {
     const { username, email, password } = req.body;
     
     if (users.find(u => u.email === email)) {
-        return requireResponse.json({ success: false, message: 'Bu e-posta zaten kayıtlı!' });
+        return res.json({ success: false, message: 'Bu e-posta zaten kayıtlı!' });
     }
 
     const newUser = {
         username,
         email,
         password,
-        rank: 'Kullanıcı', // Yeni kayıt olanlar standart kullanıcı rankı alır
+        rank: 'Kullanıcı', // Yeni kayıt olanlar standart rolü alır
         joinDate: new Date().toISOString().split('T')[0]
     };
     
     users.push(newUser);
     req.session.user = { username: newUser.username, email: newUser.email, rank: newUser.rank };
-    return requireResponse.json({ success: true, message: 'Kayıt başarılı!' });
+    return res.json({ success: true, message: 'Kayıt başarılı!' });
 });
 
 // API: Mevcut Oturumu Getir
-app.get('/api/auth/session', (req, requireResponse) => {
+app.get('/api/auth/session', (req, res) => {
     if (req.session.user) {
-        return requireResponse.json({ loggedIn: true, user: req.session.user });
+        return res.json({ loggedIn: true, user: req.session.user });
     }
-    return requireResponse.json({ loggedIn: false });
+    return res.json({ loggedIn: false });
 });
 
 // API: Çıkış Yapma
-app.get('/api/auth/logout', (req, requireResponse) => {
+app.get('/api/auth/logout', (req, res) => {
     req.session.destroy();
-    return requireResponse.json({ success: true });
+    return res.json({ success: true });
 });
 
 // API: Hileleri Listele
-app.get('/api/clients', (req, requireResponse) => {
-    return requireResponse.json(clients);
+app.get('/api/clients', (req, res) => {
+    return res.json(clients);
 });
 
-// Ana Sayfa Yönlendirmesi
-app.get('*', (req, requireResponse) => {
-    requireResponse.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Ana Sayfa Yönlendirmesi (Frontend Router)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Sunucuyu Başlat
 app.listen(PORT, () => {
-    console.log(`[SERVER] Sunucu ${PORT} portunda sıfır hata ile çalışıyor.`);
-    console.log(`[AUTOLOGIN] resul3163@gmail.com hesabı Admin yetkisiyle oluşturuldu.`);
+    console.log(`\n==================================================`);
+    console.log(`[SERVER] Sunucu ${PORT} portunda aktif.`);
+    console.log(`[ADMIN] Girdiğin mail ve şifre başarıyla entegre edildi.`);
+    console.log(`[CLIENTS] Toplam ${clients.length} adet hile başarıyla yüklendi.`);
+    console.log(`==================================================\n`);
 });
-        
