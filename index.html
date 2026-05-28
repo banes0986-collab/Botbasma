@@ -3,57 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Hub | Giriş Paneli</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Nexus Hub | Premium Minecraft Clients</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #050b14;
+            --bg-surface: #0a1424;
+            --bg-surface-light: #112035;
+            --accent-blue: #0066ff;
+            --accent-glow: rgba(0, 102, 255, 0.3);
+            --text-main: #f0f4f9;
+            --text-muted: #798da3;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; }
+
+        /* Giriş Ekranı */
+        .auth-page { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at center, #0a1b3a 0%, #050b14 100%); }
+        .auth-wrapper { width: 100%; max-width: 400px; padding: 20px; }
+        .auth-brand { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 25px; color: #fff; text-shadow: 0 0 10px var(--accent-glow); }
+        .auth-brand span { color: var(--accent-blue); }
+        .auth-brand i { color: var(--accent-blue); margin-right: 10px; }
+        .auth-container { background: var(--bg-surface); border: 1px solid rgba(0, 102, 255, 0.15); border-radius: 12px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+        .auth-container h2 { font-size: 20px; margin-bottom: 20px; text-align: center; color: var(--text-main); }
+        .input-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+        .input-field label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+        .input-field input { background: var(--bg-surface-light); border: 1px solid rgba(250,250,250,0.05); padding: 12px; border-radius: 6px; color: #fff; outline: none; transition: 0.2s; }
+        .input-field input:focus { border-color: var(--accent-blue); }
+        .btn-block { background: var(--accent-blue); color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .btn-block:hover { box-shadow: 0 0 15px var(--accent-glow); background: #0055dd; }
+        .switch-text { font-size: 13px; text-align: center; margin-top: 15px; color: var(--text-muted); }
+        .switch-text a { color: var(--accent-blue); text-decoration: none; font-weight: 600; }
+
+        /* Dashboard Ekranı */
+        .dashboard-page { display: none; }
+        .navbar { background: rgba(10, 20, 36, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0, 102, 255, 0.15); position: fixed; width: 100%; top: 0; z-index: 100; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 15px 24px; }
+        .brand { font-size: 20px; font-weight: 800; color: #fff; text-decoration: none; }
+        .brand span { color: var(--accent-blue); }
+        .brand i { color: var(--accent-blue); margin-right: 6px; }
+        .nav-links { display: flex; list-style: none; gap: 25px; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .nav-links a:hover, .nav-links a.active { color: #fff; text-shadow: 0 0 8px var(--accent-glow); }
+        .user-badge { display: flex; align-items: center; background: var(--bg-surface-light); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(250,250,250,0.05); gap: 12px; }
+        .u-info { display: flex; flex-direction: column; line-height: 1.2; }
+        .u-info span { font-size: 13px; font-weight: 600; }
+        .rank-tag { font-size: 11px !important; color: #00cc66; font-weight: 700; text-transform: uppercase; }
+        .admin-style { color: #ff3333 !important; text-shadow: 0 0 8px rgba(255,51,51,0.6); }
+        .power-btn { background: transparent; border: none; color: #ff4d4d; cursor: pointer; font-size: 14px; }
+
+        /* Grid Sistemi */
+        .main-content { max-width: 1200px; margin: 110px auto 40px; padding: 0 24px; }
+        .tab-content { display: none; }
+        .active-tab { display: block; }
+        .section-header { margin-bottom: 30px; }
+        .section-header h1 { font-size: 28px; margin-bottom: 6px; }
+        .section-header p { color: var(--text-muted); font-size: 15px; }
+        .client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .client-card { background: var(--bg-surface); border: 1px solid rgba(0, 102, 255, 0.08); border-radius: 10px; padding: 20px; transition: 0.2s; }
+        .client-card:hover { border-color: rgba(0, 102, 255, 0.25); transform: translateY(-3px); }
+        .client-meta { display: flex; gap: 8px; margin-bottom: 12px; }
+        .version-badge, .api-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: var(--bg-surface-light); }
+        .version-badge { color: #ffb300; }
+        .api-badge { color: #00b0ff; }
+        .client-title { font-size: 17px; margin-bottom: 15px; word-break: break-all; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(250,250,250,0.05); padding-top: 12px; }
+        .dl-count { font-size: 12px; color: var(--text-muted); }
+        .download-action-btn { background: var(--bg-surface-light); border: 1px solid rgba(0, 102, 255, 0.2); color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: 600; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; }
+        .download-action-btn:hover { background: var(--accent-blue); }
+        .empty-card { text-align: center; padding: 50px; background: var(--bg-surface); border-radius: 10px; border: 1px dashed rgba(250,250,250,0.1); }
+        .empty-card i { font-size: 32px; color: var(--text-muted); margin-bottom: 10px; }
+        .hidden { display: none !important; }
+    </style>
 </head>
-<body class="auth-body">
+<body>
 
-    <div class="auth-wrapper">
-        <div class="auth-brand">
-            <i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span>
-        </div>
-        
-        <div class="auth-container" id="authBox">
-            <h2 id="formTitle">Sisteme Giriş Yap</h2>
+    <div id="authPage" class="auth-page">
+        <div class="auth-wrapper">
+            <div class="auth-brand">
+                <i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span>
+            </div>
             
-            <!-- GİRİŞ FORMU -->
-            <form id="loginForm" onsubmit="submitAuth(event, 'login')">
-                <div class="input-field">
-                    <label><i class="fa-solid fa-envelope"></i> E-Posta</label>
-                    <input type="email" id="loginEmail" required placeholder="ornek@mail.com">
-                </div>
-                <div class="input-field">
-                    <label><i class="fa-solid fa-lock"></i> Şifre</label>
-                    <input type="password" id="loginPassword" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn-block">Giriş Yap</button>
-                <p class="switch-text">Hesabınız yok mu? <a href="#" onclick="toggleForms('register')">Kayıt Olun</a></p>
-            </form>
+            <div class="auth-container">
+                <h2 id="formTitle">Sisteme Giriş Yap</h2>
+                
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="input-field">
+                        <label><i class="fa-solid fa-envelope"></i> E-Posta</label>
+                        <input type="email" id="loginEmail" required placeholder="ornek@mail.com">
+                    </div>
+                    <div class="input-field">
+                        <label><i class="fa-solid fa-lock"></i> Şifre</label>
+                        <input type="password" id="loginPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-block">Giriş Yap</button>
+                    <p class="switch-text">Hesabınız yok mu? <a href="#" onclick="toggleForm('register')">Kayıt Olun</a></p>
+                </form>
 
-            <!-- KAYIT FORMU -->
-            <form id="registerForm" class="hidden" onsubmit="submitAuth(event, 'register')">
-                <div class="input-field">
-                    <label><i class="fa-solid fa-user"></i> Kullanıcı Adı</label>
-                    <input type="text" id="regUsername" required placeholder="Kullanıcı adınız">
-                </div>
-                <div class="input-field">
-                    <label><i class="fa-solid fa-envelope"></i> E-Posta</label>
-                    <input type="email" id="regEmail" required placeholder="ornek@mail.com">
-                </div>
-                <div class="input-field">
-                    <label><i class="fa-solid fa-lock"></i> Şifre</label>
-                    <input type="password" id="regPassword" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn-block">Kayıt Ol</button>
-                <p class="switch-text">Zaten hesabınız var mı? <a href="#" onclick="toggleForms('login')">Giriş Yapın</a></p>
-            </form>
+                <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+                    <div class="input-field">
+                        <label><i class="fa-solid fa-user"></i> Kullanıcı Adı</label>
+                        <input type="text" id="regUsername" required placeholder="Kullanıcı adınız">
+                    </div>
+                    <div class="input-field">
+                        <label><i class="fa-solid fa-envelope"></i> E-Posta</label>
+                        <input type="email" id="regEmail" required placeholder="ornek@mail.com">
+                    </div>
+                    <div class="input-field">
+                        <label><i class="fa-solid fa-lock"></i> Şifre</label>
+                        <input type="password" id="regPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-block">Kayıt Ol</button>
+                    <p class="switch-text">Zaten hesabınız var mı? <a href="#" onclick="toggleForm('login')">Giriş Yapın</a></p>
+                </form>
+            </div>
         </div>
     </div>
 
+    <div id="dashboardPage" class="dashboard-page">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="#" class="brand"><i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span></a>
+                <ul class="nav-links">
+                    <li><a class="active" id="nav-explore" onclick="switchTab('explore')"><i class="fa-solid fa-compass"></i> Hile Clientleri</a></li>
+                    <li><a id="nav-configs" onclick="switchTab('configs')"><i class="fa-solid fa-sliders"></i> Configler</a></li>
+                </ul>
+                <div class="user-badge">
+                    <div class="u-info">
+                        <span id="displayUsername">User</span>
+                        <span id="displayRank" class="rank-tag">Kullanıcı</span>
+                    </div>
+                    <button onclick="logout()" class="power-btn" title="Çıkış Yap"><i class="fa-solid fa-power-off"></i></button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <section id="explore-tab" class="tab-content active-tab">
+                <div class="section-header">
+                    <h1>Minecraft Hile Dosyaları</h1>
+                    <p>Attığın tüm .jar dosyaları eksiksiz listelenmiştir. İndirme butonları aktiftir.</p>
+                </div>
+                
+                <div class="client-grid" id="itemsGrid">
+                    </div>
+            </section>
+
+            <section id="configs-tab" class="tab-content">
+                <div class="section-header">
+                    <h1>Kullanıcı Config Ayarları</h1>
+                    <p>Hileler için en iyi bypass ve optimize ayar dosyaları.</p>
+                </div>
+                <div class="empty-card">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    <h3>Çok Yakında...</h3>
+                    <p>Bu alan için özel bypass config dosyaları hazırlanıyor. Takipte kalın.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
     <script>
-        function toggleForms(type) {
-            if(type === 'register') {
+        // Tarayıcı hafızasında sanal veri tabanı oluşturuyoruz
+        if (!localStorage.getItem('users')) {
+            // İstediğin otomatik Admin hesabı ilk açılışta yüklenir
+            const defaultUsers = [{
+                email: 'resul3163@gmail.com',
+                username: 'ResulBaba',
+                password: 'resulbaba',
+                rank: 'Admin'
+            }];
+            localStorage.setItem('users', JSON.stringify(defaultUsers));
+        }
+
+        // İstediğin Eksiksiz Hile Listesi
+        const clients = [
+            { name: 'Amphetamine.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 1420 },
+            { name: 'PrizrakDLC-mentcenter1.0.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 890 },
+            { name: 'ArvionClient.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 2150 },
+            { name: 'ExperimentClient.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 640 },
+            { name: 'moonward-recode.jar', version: '1.21.4', type: 'Fabric API Gerekli', dlCount: 3120 },
+            { name: 'thunderremake.jar', version: '1.21', type: 'Fabric API Gerekli', dlCount: 4500 }
+        ];
+
+        // Giriş ve Kayıt Form Geçişleri
+        function toggleForm(type) {
+            if (type === 'register') {
                 document.getElementById('loginForm').classList.add('hidden');
                 document.getElementById('registerForm').classList.remove('hidden');
                 document.getElementById('formTitle').innerText = 'Yeni Hesap Oluştur';
@@ -64,41 +200,98 @@
             }
         }
 
-        async function submitAuth(event, type) {
-            event.preventDefault();
-            const url = type === 'login' ? '/api/auth/login' : '/api/auth/register';
+        // Sekme Değiştirici
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
+            document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
             
-            const payload = type === 'login' ? {
-                email: document.getElementById('loginEmail').value,
-                password: document.getElementById('loginPassword').value
-            } : {
-                username: document.getElementById('regUsername').value,
-                email: document.getElementById('regEmail').value,
-                password: document.getElementById('regPassword').value
-            };
+            document.getElementById(tabName + '-tab').classList.add('active-tab');
+            document.getElementById('nav-' + tabName).classList.add('active');
+        }
 
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
+        // Kayıt Olma Fonksiyonu
+        function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            let currentUsers = JSON.parse(localStorage.getItem('users'));
+
+            if (currentUsers.find(u => u.email === email)) {
+                alert('Bu e-posta zaten kayıtlı!');
+                return;
+            }
+
+            const newUser = { username, email, password, rank: 'Kullanıcı' };
+            currentUsers.push(newUser);
+            localStorage.setItem('users', JSON.stringify(currentUsers));
+
+            alert('Hesabınız başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.');
+            document.getElementById('registerForm').reset();
+            toggleForm('login');
+        }
+
+        // Giriş Yapma Fonksiyonu
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const currentUsers = JSON.parse(localStorage.getItem('users'));
+            const user = currentUsers.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                // Giriş Başarılı, sayfayı Dashboard'a çevir
+                document.getElementById('authPage').style.display = 'none';
+                document.getElementById('dashboardPage').style.display = 'block';
+
+                // Bilgileri ekrana bas
+                document.getElementById('displayUsername').innerText = user.username;
+                const rankEl = document.getElementById('displayRank');
+                rankEl.innerText = user.rank;
+
+                if (user.rank === 'Admin') {
+                    rankEl.classList.add('admin-style');
+                } else {
+                    rankEl.classList.remove('admin-style');
+                }
+
+                loadDashboardItems();
+            } else {
+                alert('Hatalı e-posta veya şifre girdiniz!');
+            }
+        }
+
+        // Hile Kartlarını Listeleme
+        function loadDashboardItems() {
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = '';
+
+            clients.forEach(client => {
+                grid.innerHTML += `
+                    <div class="client-card">
+                        <div class="client-meta">
+                            <span class="version-badge"><i class="fa-solid fa-code-branch"></i> MC ${client.version}</span>
+                            <span class="api-badge"><i class="fa-solid fa-cubes"></i> ${client.type}</span>
+                        </div>
+                        <h2 class="client-title">${client.name}</h2>
+                        <div class="card-footer">
+                            <span class="dl-count"><i class="fa-solid fa-download"></i> ${client.dlCount} indirme</span>
+                            <a href="${client.name}" download class="download-action-btn"><i class="fa-solid fa-arrow-down-to-line"></i> İndir</a>
+                        </div>
+                    </div>
+                `;
             });
-            const data = await res.json();
-            
-            alert(data.message);
-            if(data.success) {
-                window.location.href = '/dashboard'; // Giriş başarılıysa paneli aç
-            }
         }
 
-        // Eğer kullanıcı zaten giriş yapmışsa direkt yönlendir
-        async function checkActiveSession() {
-            const res = await fetch('/api/auth/session');
-            const data = await res.json();
-            if(data.loggedIn) {
-                window.location.href = '/dashboard';
-            }
+        // Çıkış Yapma
+        function logout() {
+            document.getElementById('loginForm').reset();
+            document.getElementById('dashboardPage').style.display = 'none';
+            document.getElementById('authPage').style.display = 'flex';
+            toggleForm('login');
         }
-        checkActiveSession();
     </script>
 </body>
 </html>
