@@ -9,20 +9,24 @@
 </head>
 <body>
 
+    <!-- Navigasyon Çubuğu -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="#" class="brand"><i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span></a>
             <ul class="nav-links">
-                <li><a href="#" class="active" onclick="switchTab('explore')"><i class="fa-solid fa-compass"></i> Keşfet</a></li>
-                <li><a href="#" onclick="switchTab('configs')"><i class="fa-solid fa-sliders"></i> Configler</a></li>
+                <li><a href="#" class="active" id="nav-explore" onclick="switchTab('explore')"><i class="fa-solid fa-compass"></i> Keşfet</a></li>
+                <li><a href="#" id="nav-configs" onclick="switchTab('configs')"><i class="fa-solid fa-sliders"></i> Configler</a></li>
             </ul>
             <div class="auth-zone" id="authZone">
-                </div>
+                <!-- Oturum durumuna göre butonlar veya profil buraya gelecek -->
+            </div>
         </div>
     </nav>
 
+    <!-- Ana İçerik Alanı -->
     <main class="main-content">
         
+        <!-- KEŞFET SEKMESİ -->
         <section id="explore-tab" class="tab-content active-tab">
             <div class="section-header">
                 <h1>Minecraft Hile Clientleri</h1>
@@ -30,9 +34,11 @@
             </div>
             
             <div class="client-grid" id="clientGrid">
-                </div>
+                <!-- Hile listesi sunucudan çekilerek buraya yüklenecek -->
+            </div>
         </section>
 
+        <!-- CONFIGLER SEKMESİ -->
         <section id="configs-tab" class="tab-content">
             <div class="section-header">
                 <h1>Kullanıcı Config Ayarları</h1>
@@ -46,6 +52,7 @@
         </section>
     </main>
 
+    <!-- AUTH MODAL (Giriş / Kayıt Pencereleri) -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-box">
             <div class="modal-header">
@@ -53,6 +60,7 @@
                 <button class="close-btn" onclick="toggleModal(false)"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
+            <!-- Giriş Formu -->
             <form id="loginForm" class="auth-form" onsubmit="handleAuth(event, 'login')">
                 <div class="input-group">
                     <label>E-Posta Adresi</label>
@@ -66,6 +74,7 @@
                 <p class="form-switch">Hesabın yok mu? <a href="#" onclick="toggleAuthForm('register')">Kayıt Ol</a></p>
             </form>
 
+            <!-- Kayıt Formu -->
             <form id="registerForm" class="auth-form hidden" onsubmit="handleAuth(event, 'register')">
                 <div class="input-group">
                     <label>Kullanıcı Adı</label>
@@ -92,15 +101,16 @@
             document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
             
             document.getElementById(`${tabName}-tab`).classList.add('active-tab');
-            event.target.classList.add('active');
+            document.getElementById(`nav-${tabName}`).classList.add('active');
         }
 
-        // Modal Yönetimi
+        // Modal Penceresini Açma / Kapatma
         function toggleModal(show) {
             const modal = document.getElementById('authModal');
             modal.style.display = show ? 'flex' : 'none';
         }
 
+        // Giriş ve Kayıt Formları Arası Geçiş
         function toggleAuthForm(type) {
             if(type === 'register') {
                 document.getElementById('loginForm').classList.add('hidden');
@@ -113,87 +123,114 @@
             }
         }
 
-        // Oturum ve Veri Çekme İşlemleri
+        // Oturum Durumunu Kontrol Eden Fonksiyon
         async function checkSession() {
-            const res = await fetch('/api/auth/session');
-            const data = await res.json();
-            const authZone = document.getElementById('authZone');
+            try {
+                const res = await fetch('/api/auth/session');
+                const data = await res.json();
+                const authZone = document.getElementById('authZone');
 
-            if(data.loggedIn) {
-                // Rank rengine göre dinamik sınıf atama
-                let rankClass = data.user.rank === 'Admin' ? 'rank-admin' : 'rank-user';
-                authZone.innerHTML = `
-                    <div class="user-profile-badge">
-                        <div class="user-info">
-                            <span class="u-name">${data.user.username}</span>
-                            <span class="u-rank ${rankClass}">${data.user.rank}</span>
+                if(data.loggedIn) {
+                    let rankClass = data.user.rank === 'Admin' ? 'rank-admin' : 'rank-user';
+                    authZone.innerHTML = `
+                        <div class="user-profile-badge">
+                            <div class="user-info">
+                                <span class="u-name">${data.user.username}</span>
+                                <span class="u-rank ${rankClass}">${data.user.rank}</span>
+                            </div>
+                            <button onclick="logout()" class="logout-btn" title="Çıkış Yap"><i class="fa-solid fa-power-off"></i></button>
                         </div>
-                        <button onclick="logout()" class="logout-btn" title="Çıkış Yap"><i class="fa-solid fa-power-off"></i></button>
-                    </div>
-                `;
-            } else {
-                authZone.innerHTML = `<button class="btn-login" onclick="toggleModal(true)"><i class="fa-solid fa-right-to-bracket"></i> Giriş Yap</button>`;
+                    `;
+                } else {
+                    authZone.innerHTML = `<button class="btn-login" onclick="toggleModal(true)"><i class="fa-solid fa-right-to-bracket"></i> Giriş Yap / Kayıt Ol</button>`;
+                }
+            } catch (err) {
+                console.error("Oturum kontrol edilirken hata oluştu:", err);
             }
         }
 
+        // HEM KAYIT HEM GİRİŞ SİSTEMİNİ ÇALIŞTIRAN ANA FONKSİYON
         async function handleAuth(event, type) {
             event.preventDefault();
-            const url = type === 'login' ? '/api/auth/login' : '/api/auth/register';
-            const payload = type === 'login' ? {
-                email: document.getElementById('loginEmail').value,
-                password: document.getElementById('loginPassword').value
-            } : {
-                username: document.getElementById('regUsername').value,
-                email: document.getElementById('regEmail').value,
-                password: document.getElementById('regPassword').value
-            };
-
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
             
-            alert(data.message);
-            if(data.success) {
-                toggleModal(false);
-                checkSession();
+            const url = type === 'login' ? '/api/auth/login' : '/api/auth/register';
+            let payload = {};
+
+            if (type === 'login') {
+                payload = {
+                    email: document.getElementById('loginEmail').value,
+                    password: document.getElementById('loginPassword').value
+                };
+            } else {
+                payload = {
+                    username: document.getElementById('regUsername').value,
+                    email: document.getElementById('regEmail').value,
+                    password: document.getElementById('regPassword').value
+                };
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                
+                alert(data.message);
+                
+                if(data.success) {
+                    // Formları temizle
+                    document.getElementById('loginForm').reset();
+                    document.getElementById('registerForm').reset();
+                    // Modalı kapat ve arayüzü güncelle
+                    toggleModal(false);
+                    checkSession();
+                }
+            } catch (err) {
+                alert("Bağlantı hatası oluştu!");
             }
         }
 
+        // Çıkış Yapma Fonksiyonu
         async function logout() {
             await fetch('/api/auth/logout');
             checkSession();
         }
 
+        // Hile Listesini Backend'den Çeken Fonksiyon
         async function loadClients() {
-            const res = await fetch('/api/clients');
-            const clients = await res.json();
-            const grid = document.getElementById('clientGrid');
-            grid.innerHTML = '';
+            try {
+                const res = await fetch('/api/clients');
+                const clients = await res.json();
+                const grid = document.getElementById('clientGrid');
+                grid.innerHTML = '';
 
-            clients.forEach(client => {
-                grid.innerHTML += `
-                    <div class="client-card">
-                        <div class="card-glow"></div>
-                        <div class="client-meta">
-                            <span class="version-badge"><i class="fa-solid fa-code-branch"></i> MC ${client.version}</span>
-                            <span class="api-badge"><i class="fa-solid fa-cubes"></i> ${client.type}</span>
+                clients.forEach(client => {
+                    grid.innerHTML += `
+                        <div class="client-card">
+                            <div class="client-meta">
+                                <span class="version-badge"><i class="fa-solid fa-code-branch"></i> MC ${client.version}</span>
+                                <span class="api-badge"><i class="fa-solid fa-cubes"></i> ${client.type}</span>
+                            </div>
+                            <h2 class="client-title">${client.name}</h2>
+                            <div class="card-footer">
+                                <span class="dl-count"><i class="fa-solid fa-download"></i> ${client.dlCount} indirme</span>
+                                <button class="download-action-btn"><i class="fa-solid fa-arrow-down-to-line"></i> İndir</button>
+                            </div>
                         </div>
-                        <h2 class="client-title">${client.name}</h2>
-                        <div class="card-footer">
-                            <span class="dl-count"><i class="fa-solid fa-download"></i> ${client.dlCount} indirme</span>
-                            <button class="download-action-btn"><i class="fa-solid fa-arrow-down-to-line"></i> İndir</button>
-                        </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            } catch (err) {
+                console.error("Hile listesi yüklenirken hata oluştu:", err);
+            }
         }
 
-        // Sayfa Yüklendiğinde Çalıştır
-        checkSession();
-        loadClients();
+        // Sayfa ilk açıldığında çalışacak tetikleyiciler
+        window.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+            loadClients();
+        });
     </script>
 </body>
 </html>
