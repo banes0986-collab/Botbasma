@@ -3,234 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Hub | Premium Minecraft Clients</title>
+    <title>Nexus Hub | Giriş Paneli</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="auth-body">
 
-    <!-- Navigasyon Çubuğu -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="#" class="brand"><i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span></a>
-            <ul class="nav-links">
-                <li><a href="#" class="active" id="nav-explore" onclick="switchTab('explore')"><i class="fa-solid fa-compass"></i> Keşfet</a></li>
-                <li><a href="#" id="nav-configs" onclick="switchTab('configs')"><i class="fa-solid fa-sliders"></i> Configler</a></li>
-            </ul>
-            <div class="auth-zone" id="authZone">
-                <!-- Oturum durumuna göre butonlar veya profil buraya gelecek -->
-            </div>
+    <div class="auth-wrapper">
+        <div class="auth-brand">
+            <i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span>
         </div>
-    </nav>
-
-    <!-- Ana İçerik Alanı -->
-    <main class="main-content">
         
-        <!-- KEŞFET SEKMESİ -->
-        <section id="explore-tab" class="tab-content active-tab">
-            <div class="section-header">
-                <h1>Minecraft Hile Clientleri</h1>
-                <p>En güncel, optimize edilmiş ve doğrulanmış hile arşivimiz. Tüm hileler stabilite testinden geçmiştir.</p>
-            </div>
+        <div class="auth-container" id="authBox">
+            <h2 id="formTitle">Sisteme Giriş Yap</h2>
             
-            <div class="client-grid" id="clientGrid">
-                <!-- Hile listesi sunucudan çekilerek buraya yüklenecek -->
-            </div>
-        </section>
-
-        <!-- CONFIGLER SEKMESİ -->
-        <section id="configs-tab" class="tab-content">
-            <div class="section-header">
-                <h1>Kullanıcı Config Ayarları</h1>
-                <p>Hileler için en iyi bypass ve optimize ayar dosyaları.</p>
-            </div>
-            <div class="empty-state-card">
-                <i class="fa-solid fa-hourglass-half"></i>
-                <h3>Yakında...</h3>
-                <p>Bu alan için hazırlanan özel bypass config dosyaları çok yakında buraya yüklenecektir. Takipte kalın.</p>
-            </div>
-        </section>
-    </main>
-
-    <!-- AUTH MODAL (Giriş / Kayıt Pencereleri) -->
-    <div class="modal-overlay" id="authModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h2 id="modalTitle">Giriş Yap</h2>
-                <button class="close-btn" onclick="toggleModal(false)"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <!-- Giriş Formu -->
-            <form id="loginForm" class="auth-form" onsubmit="handleAuth(event, 'login')">
-                <div class="input-group">
-                    <label>E-Posta Adresi</label>
+            <!-- GİRİŞ FORMU -->
+            <form id="loginForm" onsubmit="submitAuth(event, 'login')">
+                <div class="input-field">
+                    <label><i class="fa-solid fa-envelope"></i> E-Posta</label>
                     <input type="email" id="loginEmail" required placeholder="ornek@mail.com">
                 </div>
-                <div class="input-group">
-                    <label>Şifre</label>
+                <div class="input-field">
+                    <label><i class="fa-solid fa-lock"></i> Şifre</label>
                     <input type="password" id="loginPassword" required placeholder="••••••••">
                 </div>
-                <button type="submit" class="btn-primary">Sisteme Bağlan</button>
-                <p class="form-switch">Hesabın yok mu? <a href="#" onclick="toggleAuthForm('register')">Kayıt Ol</a></p>
+                <button type="submit" class="btn-block">Giriş Yap</button>
+                <p class="switch-text">Hesabınız yok mu? <a href="#" onclick="toggleForms('register')">Kayıt Olun</a></p>
             </form>
 
-            <!-- Kayıt Formu -->
-            <form id="registerForm" class="auth-form hidden" onsubmit="handleAuth(event, 'register')">
-                <div class="input-group">
-                    <label>Kullanıcı Adı</label>
+            <!-- KAYIT FORMU -->
+            <form id="registerForm" class="hidden" onsubmit="submitAuth(event, 'register')">
+                <div class="input-field">
+                    <label><i class="fa-solid fa-user"></i> Kullanıcı Adı</label>
                     <input type="text" id="regUsername" required placeholder="Kullanıcı adınız">
                 </div>
-                <div class="input-group">
-                    <label>E-Posta Adresi</label>
+                <div class="input-field">
+                    <label><i class="fa-solid fa-envelope"></i> E-Posta</label>
                     <input type="email" id="regEmail" required placeholder="ornek@mail.com">
                 </div>
-                <div class="input-group">
-                    <label>Şifre</label>
+                <div class="input-field">
+                    <label><i class="fa-solid fa-lock"></i> Şifre</label>
                     <input type="password" id="regPassword" required placeholder="••••••••">
                 </div>
-                <button type="submit" class="btn-primary">Hesap Oluştur</button>
-                <p class="form-switch">Zaten kayıtlı mısın? <a href="#" onclick="toggleAuthForm('login')">Giriş Yap</a></p>
+                <button type="submit" class="btn-block">Kayıt Ol</button>
+                <p class="switch-text">Zaten hesabınız var mı? <a href="#" onclick="toggleForms('login')">Giriş Yapın</a></p>
             </form>
         </div>
     </div>
 
     <script>
-        // Sekme Değiştirici
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
-            document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(`${tabName}-tab`).classList.add('active-tab');
-            document.getElementById(`nav-${tabName}`).classList.add('active');
-        }
-
-        // Modal Penceresini Açma / Kapatma
-        function toggleModal(show) {
-            const modal = document.getElementById('authModal');
-            modal.style.display = show ? 'flex' : 'none';
-        }
-
-        // Giriş ve Kayıt Formları Arası Geçiş
-        function toggleAuthForm(type) {
+        function toggleForms(type) {
             if(type === 'register') {
                 document.getElementById('loginForm').classList.add('hidden');
                 document.getElementById('registerForm').classList.remove('hidden');
-                document.getElementById('modalTitle').innerText = 'Kayıt Ol';
+                document.getElementById('formTitle').innerText = 'Yeni Hesap Oluştur';
             } else {
                 document.getElementById('registerForm').classList.add('hidden');
                 document.getElementById('loginForm').classList.remove('hidden');
-                document.getElementById('modalTitle').innerText = 'Giriş Yap';
+                document.getElementById('formTitle').innerText = 'Sisteme Giriş Yap';
             }
         }
 
-        // Oturum Durumunu Kontrol Eden Fonksiyon
-        async function checkSession() {
-            try {
-                const res = await fetch('/api/auth/session');
-                const data = await res.json();
-                const authZone = document.getElementById('authZone');
-
-                if(data.loggedIn) {
-                    let rankClass = data.user.rank === 'Admin' ? 'rank-admin' : 'rank-user';
-                    authZone.innerHTML = `
-                        <div class="user-profile-badge">
-                            <div class="user-info">
-                                <span class="u-name">${data.user.username}</span>
-                                <span class="u-rank ${rankClass}">${data.user.rank}</span>
-                            </div>
-                            <button onclick="logout()" class="logout-btn" title="Çıkış Yap"><i class="fa-solid fa-power-off"></i></button>
-                        </div>
-                    `;
-                } else {
-                    authZone.innerHTML = `<button class="btn-login" onclick="toggleModal(true)"><i class="fa-solid fa-right-to-bracket"></i> Giriş Yap / Kayıt Ol</button>`;
-                }
-            } catch (err) {
-                console.error("Oturum kontrol edilirken hata oluştu:", err);
-            }
-        }
-
-        // HEM KAYIT HEM GİRİŞ SİSTEMİNİ ÇALIŞTIRAN ANA FONKSİYON
-        async function handleAuth(event, type) {
+        async function submitAuth(event, type) {
             event.preventDefault();
-            
             const url = type === 'login' ? '/api/auth/login' : '/api/auth/register';
-            let payload = {};
+            
+            const payload = type === 'login' ? {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            } : {
+                username: document.getElementById('regUsername').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value
+            };
 
-            if (type === 'login') {
-                payload = {
-                    email: document.getElementById('loginEmail').value,
-                    password: document.getElementById('loginPassword').value
-                };
-            } else {
-                payload = {
-                    username: document.getElementById('regUsername').value,
-                    email: document.getElementById('regEmail').value,
-                    password: document.getElementById('regPassword').value
-                };
-            }
-
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                
-                alert(data.message);
-                
-                if(data.success) {
-                    // Formları temizle
-                    document.getElementById('loginForm').reset();
-                    document.getElementById('registerForm').reset();
-                    // Modalı kapat ve arayüzü güncelle
-                    toggleModal(false);
-                    checkSession();
-                }
-            } catch (err) {
-                alert("Bağlantı hatası oluştu!");
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            
+            alert(data.message);
+            if(data.success) {
+                window.location.href = '/dashboard'; // Giriş başarılıysa paneli aç
             }
         }
 
-        // Çıkış Yapma Fonksiyonu
-        async function logout() {
-            await fetch('/api/auth/logout');
-            checkSession();
-        }
-
-        // Hile Listesini Backend'den Çeken Fonksiyon
-        async function loadClients() {
-            try {
-                const res = await fetch('/api/clients');
-                const clients = await res.json();
-                const grid = document.getElementById('clientGrid');
-                grid.innerHTML = '';
-
-                clients.forEach(client => {
-                    grid.innerHTML += `
-                        <div class="client-card">
-                            <div class="client-meta">
-                                <span class="version-badge"><i class="fa-solid fa-code-branch"></i> MC ${client.version}</span>
-                                <span class="api-badge"><i class="fa-solid fa-cubes"></i> ${client.type}</span>
-                            </div>
-                            <h2 class="client-title">${client.name}</h2>
-                            <div class="card-footer">
-                                <span class="dl-count"><i class="fa-solid fa-download"></i> ${client.dlCount} indirme</span>
-                                <button class="download-action-btn"><i class="fa-solid fa-arrow-down-to-line"></i> İndir</button>
-                            </div>
-                        </div>
-                    `;
-                });
-            } catch (err) {
-                console.error("Hile listesi yüklenirken hata oluştu:", err);
+        // Eğer kullanıcı zaten giriş yapmışsa direkt yönlendir
+        async function checkActiveSession() {
+            const res = await fetch('/api/auth/session');
+            const data = await res.json();
+            if(data.loggedIn) {
+                window.location.href = '/dashboard';
             }
         }
-
-        // Sayfa ilk açıldığında çalışacak tetikleyiciler
-        window.addEventListener('DOMContentLoaded', () => {
-            checkSession();
-            loadClients();
-        });
+        checkActiveSession();
     </script>
 </body>
 </html>
