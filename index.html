@@ -41,8 +41,8 @@
         .btn-block { background: var(--accent-blue); color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
         .btn-block:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-2px); }
         .switch-text { font-size: 14px; text-align: center; margin-top: 20px; color: var(--text-muted); }
-        .switch-text a { color: var(--accent-blue); text-decoration: none; font-weight: bold; transition: 0.2s; }
-        .switch-text a:hover { text-shadow: 0 0 8px var(--accent-glow); }
+        .switch-text span { color: var(--accent-blue); font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .switch-text span:hover { text-shadow: 0 0 8px var(--accent-glow); }
 
         /* --- DASHBOARD (KONTROL PANELİ) --- */
         .dashboard-page { display: none; min-height: 100vh; position: relative; }
@@ -116,7 +116,6 @@
         .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; margin-top: 10px; }
         .dl-status { font-size: 13px; color: #00cc66; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         
-        /* Kesin İndirme Butonu */
         .download-btn { background: var(--accent-blue); color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; border: none; cursor: pointer; }
         .download-btn:hover { background: #0055dd; box-shadow: 0 0 15px var(--accent-glow); transform: scale(1.05); }
 
@@ -145,7 +144,6 @@
 </head>
 <body>
 
-    <!-- GİRİŞ / KAYIT EKRANI -->
     <div id="authPage" class="auth-page">
         <div class="auth-wrapper">
             <div class="auth-brand">
@@ -155,8 +153,7 @@
             <div class="auth-container">
                 <h2 id="formTitle">Sisteme Giriş Yap</h2>
                 
-                <!-- GİRİŞ FORMU -->
-                <form id="loginForm" onsubmit="handleLogin(event)">
+                <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
                     <div class="input-field">
                         <label>E-Posta Adresiniz</label>
                         <input type="email" id="loginEmail" required placeholder="ornek@mail.com">
@@ -166,11 +163,10 @@
                         <input type="password" id="loginPassword" required placeholder="••••••••">
                     </div>
                     <button type="submit" class="btn-block">Giriş Yap</button>
-                    <p class="switch-text">Hesabınız yok mu? <a href="#" onclick="toggleForm('register')">Hemen Kayıt Ol</a></p>
+                    <p class="switch-text">Hesabınız yok mu? <span onclick="toggleForm('register')">Hemen Kayıt Ol</span></p>
                 </form>
 
-                <!-- KAYIT FORMU -->
-                <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+                <form id="registerForm" class="hidden" onsubmit="event.preventDefault(); handleRegister();">
                     <div class="input-field">
                         <label>Kullanıcı Adı</label>
                         <input type="text" id="regUsername" required placeholder="Oyundaki adınız">
@@ -184,21 +180,19 @@
                         <input type="password" id="regPassword" required placeholder="Güçlü bir şifre">
                     </div>
                     <button type="submit" class="btn-block">Kayıt Ol</button>
-                    <p class="switch-text">Zaten hesabınız var mı? <a href="#" onclick="toggleForm('login')">Giriş Yapın</a></p>
+                    <p class="switch-text">Zaten hesabınız var mı? <span onclick="toggleForm('login')">Giriş Yapın</span></p>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- ANA KONTROL PANELİ -->
     <div id="dashboardPage" class="dashboard-page">
         
-        <!-- ÜST NAVBAR -->
         <nav class="navbar">
             <div class="nav-container">
                 <div class="nav-left">
                     <button class="menu-toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-                    <a href="#" class="brand"><i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span></a>
+                    <a href="javascript:void(0)" class="brand"><i class="fa-solid fa-shield-halved"></i> NEXUS<span>HUB</span></a>
                 </div>
                 <div class="nav-right">
                     <div class="user-badge">
@@ -214,12 +208,10 @@
             </div>
         </nav>
 
-        <!-- YAN MENÜ -->
         <aside id="sidebar" class="sidebar">
             <ul class="sidebar-menu">
                 <li><a class="active" id="nav-explore" onclick="switchTab('explore')"><i class="fa-solid fa-compass"></i> Hile Clientleri</a></li>
                 <li><a id="nav-configs" onclick="switchTab('configs')"><i class="fa-solid fa-sliders"></i> Config Ayarları</a></li>
-                <!-- Rütbe Yönetimi (Sadece Kurucuda Görünür) -->
                 <li id="sidebar-rank-mgmt" class="hidden"><a id="nav-ranks" onclick="switchTab('ranks')"><i class="fa-solid fa-crown"></i> Rütbe Yönetimi</a></li>
             </ul>
             
@@ -228,10 +220,8 @@
             </div>
         </aside>
 
-        <!-- İÇERİK BÖLÜMÜ -->
         <main id="mainContent" class="main-content">
             
-            <!-- HİLELER SEKMESİ -->
             <section id="explore-tab" class="tab-content active-tab">
                 <div class="section-header">
                     <h1>Minecraft Premium Clientler</h1>
@@ -240,7 +230,6 @@
                 <div class="client-grid" id="itemsGrid"></div>
             </section>
 
-            <!-- CONFIG SEKMESİ -->
             <section id="configs-tab" class="tab-content">
                 <div class="section-header">
                     <h1>Özel Config & Bypass Ayarları</h1>
@@ -253,7 +242,6 @@
                 </div>
             </section>
 
-            <!-- RÜTBE YÖNETİMİ SEKMESİ -->
             <section id="ranks-tab" class="tab-content">
                 <div class="section-header">
                     <h1>Kurucu Yetki Paneli</h1>
@@ -261,7 +249,7 @@
                 </div>
                 
                 <div class="rank-management-container">
-                    <form class="rank-form" onsubmit="handleRankUpdate(event)">
+                    <form class="rank-form" onsubmit="event.preventDefault(); handleRankUpdate();">
                         <div class="form-group">
                             <label>İşlem Yapılacak Oyuncu</label>
                             <select id="rankUserSelect" required></select>
@@ -283,4 +271,12 @@
                         <table class="user-table">
                             <thead>
                                 <tr>
-                   
+                                    <th>Kullanıcı Adı</th>
+                                    <th>Kayıtlı E-Posta</th>
+                                    <th>Güncel Rütbe</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody"></tbody>
+                        </table>
+                    </div>
+               
