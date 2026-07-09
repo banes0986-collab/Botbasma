@@ -1,7 +1,7 @@
 {
   "name": "legacybots",
   "version": "1.0.0",
-  "description": "LegacyBots - Sunucu Aktiflik Sistemi",
+  "description": "Dinamik IP ve Port Destekli Bot Paneli",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
