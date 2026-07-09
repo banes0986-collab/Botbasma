@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LegacyBots | Kontrol Paneli</title>
+    <title>LegacyBots | Multi-Connect Panel</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,30 +11,28 @@
     <div class="dashboard-container">
         <header class="main-header">
             <div class="logo">Legacy<span>Bots</span></div>
-            <div class="tagline">7/24 Aternos Aktiflik Sistemi</div>
+            <div class="tagline">Dinamik Minecraft Bot Gönderme Paneli</div>
         </header>
 
         <main class="status-card">
-            <div class="status-header">
-                <h2>Sistem Durumu</h2>
-                <span id="status-indicator" class="indicator loading"></span>
-            </div>
+            <h2>Sunucu Bağlantı Ayarları</h2>
             
-            <div class="status-body">
-                <div class="status-row">
-                    <span class="label">Bot Durumu:</span>
-                    <span id="sistem-durum" class="value text-loading">Yükleniyor...</span>
-                </div>
-                <div class="status-row">
-                    <span class="label">Hedef Sunucu:</span>
-                    <span class="value IP-highlight">sunucu-adresiniz.aternos.me</span>
-                </div>
+            <div class="form-group">
+                <label for="server-ip">Sunucu IP / Adresi</label>
+                <input type="text" id="server-ip" placeholder="Örn: oyna.mcsh.in veya sunucu.aternos.me">
             </div>
 
+            <div class="form-group">
+                <label for="server-port">Sunucu Portu</label>
+                <input type="number" id="server-port" value="25565" placeholder="Varsayılan: 25565">
+            </div>
+
+            <button id="send-btn" onclick="sendBotToServer()">Botu Gönder</button>
+
             <div class="console-box">
-                <div class="console-header">Canlı Log Çıktısı</div>
+                <div class="console-header">İşlem Günlüğü</div>
                 <div id="console-logs" class="console-content">
-                    [Sistem] LegacyBots altyapısı başlatılıyor...
+                    [Sistem] Hedef sunucu bilgilerini girip "Botu Gönder" butonuna basın.
                 </div>
             </div>
         </main>
@@ -45,39 +43,47 @@
     </div>
 
     <script>
-        async function checkStatus() {
-            try {
-                const response = await fetch('/status');
-                const data = await response.json();
-                
-                const statusText = document.getElementById('sistem-durum');
-                const indicator = document.getElementById('status-indicator');
-                const logBox = document.getElementById('console-logs');
+        async function sendBotToServer() {
+            const ip = document.getElementById('server-ip').value.trim();
+            const port = document.getElementById('server-port').value.trim();
+            const logBox = document.getElementById('console-logs');
+            const btn = document.getElementById('send-btn');
 
-                // Veri başarıyla gelirse arayüzü güncelle
-                statusText.innerText = data.status + " - " + data.message;
-                statusText.className = "value text-success";
-                indicator.className = "indicator online";
-                
-                // Log ekranına bağlantı başarılı mesajı ekle (eğer daha önce eklenmediyse)
-                if(!logBox.innerHTML.includes("bağlantısı aktif")) {
-                    const zaman = new Date().toLocaleTimeString();
-                    logBox.innerHTML += `<br><span class="log-success">[${zaman}] [LegacyBot_724] Aternos bağlantısı aktif, AFK koruması devrede.</span>`;
+            if(!ip || !port) {
+                alert("Lütfen hem IP hem de Port alanlarını doldurun!");
+                return;
+            }
+
+            // Butonu geçici olarak devre dışı bırakıyoruz
+            btn.innerText = "Gönderiliyor...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/send-bot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip: ip, port: port })
+                });
+
+                const data = await response.json();
+                const zaman = new Date().toLocaleTimeString();
+
+                if(data.success) {
+                    logBox.innerHTML += `<br><span class="log-success">[${zaman}] ${data.message}</span>`;
+                } else {
+                    logBox.innerHTML += `<br><span class="log-danger">[${zaman}] Hata: ${data.message}</span>`;
                 }
             } catch (error) {
-                const statusText = document.getElementById('sistem-durum');
-                const indicator = document.getElementById('status-indicator');
-                
-                // Hata durumunda (Sunucu kapalıysa) kırmızıya çevir
-                statusText.innerText = "Bağlantı Kesildi (Sunucu Kapalı)";
-                statusText.className = "value text-danger";
-                indicator.className = "indicator offline";
+                const zaman = new Date().toLocaleTimeString();
+                logBox.innerHTML += `<br><span class="log-danger">[${zaman}] API sunucusuna bağlanılamadı.</span>`;
+            } finally {
+                // Butonu tekrar aktif ediyoruz
+                btn.innerText = "Botu Gönder";
+                btn.disabled = false;
+                // Konsolu otomatik en aşağı kaydırır
+                logBox.scrollTop = logBox.scrollHeight;
             }
         }
-        
-        // Her 5 saniyede bir durumu kontrol et
-        setInterval(checkStatus, 5000);
-        checkStatus();
     </script>
 </body>
 </html>
