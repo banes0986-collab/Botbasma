@@ -1,4 +1,3 @@
-/* Genel Sıfırlama ve Temel Ayarlar */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -7,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #0b132b; /* Derin Koyu Lacivert */
+    background-color: #0b132b;
     color: #f8f9fa;
     display: flex;
     justify-content: center;
@@ -24,21 +23,18 @@ body {
     gap: 20px;
 }
 
-/* Üst Başlık Tasarımı */
 .main-header {
     text-align: center;
-    margin-bottom: 5px;
 }
 
 .logo {
     font-size: 2.4rem;
     font-weight: 800;
-    letter-spacing: 1px;
     color: #ffffff;
 }
 
 .logo span {
-    color: #3a86ff; /* Parlak Elektrik Mavisi */
+    color: #3a86ff;
     text-shadow: 0 0 20px rgba(58, 134, 255, 0.6);
 }
 
@@ -48,93 +44,83 @@ body {
     margin-top: 4px;
 }
 
-/* Panel Kartı Alanı */
 .status-card {
-    background-color: #1c2541; /* Kart Arka Planı */
+    background-color: #1c2541;
     border: 1px solid #23315a;
     border-radius: 16px;
     padding: 25px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
-.status-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #23315a;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-}
-
-.status-header h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
+.status-card h2 {
+    font-size: 1.2rem;
     color: #e2e8f0;
+    margin-bottom: 20px;
+    font-weight: 600;
+    border-bottom: 1px solid #23315a;
+    padding-bottom: 10px;
 }
 
-/* Canlı Bildirim Işıkları (Indicator) */
-.indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.indicator.loading {
-    background-color: #ffb703;
-    box-shadow: 0 0 12px #ffb703;
-}
-
-.indicator.online {
-    background-color: #00f5d4; /* Turkuaz / Yeşil */
-    box-shadow: 0 0 14px #00f5d4;
-}
-
-.indicator.offline {
-    background-color: #ff0054; /* Kırmızı */
-    box-shadow: 0 0 14px #ff0054;
-}
-
-/* Bilgi Satırları */
-.status-body {
+/* Form Elemanları */
+.form-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 6px;
+    margin-bottom: 15px;
 }
 
-.status-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #131a30; /* Satır İçi Koyu Renk */
-    padding: 14px 16px;
-    border-radius: 10px;
-    border: 1px solid #1d2744;
-}
-
-.label {
+.form-group label {
+    font-size: 0.85rem;
     color: #8d99ae;
-    font-size: 0.95rem;
-}
-
-.value {
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input {
+    background-color: #131a30;
+    border: 1px solid #23315a;
+    padding: 12px 14px;
+    border-radius: 8px;
+    color: #ffffff;
     font-size: 0.95rem;
+    transition: all 0.3s ease;
 }
 
-/* Durum Yazı Renkleri */
-.text-loading { color: #ffb703; }
-.text-success { color: #00f5d4; }
-.text-danger { color: #ff0054; }
-
-.IP-highlight {
-    color: #3a86ff;
-    font-family: 'Consolas', Monaco, monospace;
-    font-size: 0.9rem;
+.form-group input:focus {
+    outline: none;
+    border-color: #3a86ff;
+    box-shadow: 0 0 8px rgba(58, 134, 255, 0.3);
 }
 
-/* Log / Konsol Kutusu Tasarımı */
+/* Gönderme Butonu */
+#send-btn {
+    width: 100%;
+    background-color: #3a86ff;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(58, 134, 255, 0.2);
+}
+
+#send-btn:hover {
+    background-color: #2563eb;
+    box-shadow: 0 4px 15px rgba(58, 134, 255, 0.4);
+}
+
+#send-btn:disabled {
+    background-color: #5c677d;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Konsol Kutusu */
 .console-box {
     background-color: #0b132b;
     border: 1px solid #23315a;
@@ -149,8 +135,6 @@ body {
     color: #6c757d;
     border-bottom: 1px solid #23315a;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .console-content {
@@ -158,16 +142,16 @@ body {
     font-family: 'Consolas', Monaco, monospace;
     font-size: 0.8rem;
     color: #a5b4fc;
-    min-height: 70px;
+    min-height: 100px;
+    max-height: 150px;
+    overflow-y: auto;
     line-height: 1.5;
     background-color: #070c1e;
 }
 
-.log-success {
-    color: #00f5d4;
-}
+.log-success { color: #00f5d4; }
+.log-danger { color: #ff0054; }
 
-/* Alt Kısım (Footer) */
 .main-footer {
     text-align: center;
     font-size: 0.8rem;
