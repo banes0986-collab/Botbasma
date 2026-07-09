@@ -1,10 +1,13 @@
 {
-  "name": "crm-shield-pro",
-  "version": "2.0.0",
+  "name": "legacybots",
+  "version": "1.0.0",
+  "description": "LegacyBots - Sunucu Aktiflik Sistemi",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
-    "express": "^4.18.2",
-    "request-ip": "^3.3.0",
-    "rate-limit-redis": "^3.0.1",
-    "chalk": "^4.1.2"
+    "express": "^4.19.2",
+    "mineflayer": "^4.20.0"
   }
 }
