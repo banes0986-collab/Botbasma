@@ -1,81 +1,45 @@
-/**
- * CraftHosting - Sunucu Test Paneli (backend)
- * ---------------------------------------------
- * Tarayıcıdan gelen host/port/kullanıcı adı bilgisiyle bot.js'i
- * bir alt işlem (child process) olarak çalıştırır ve çıktısını
- * Server-Sent Events (SSE) ile canlı olarak panele akıtır.
- *
- * Çalıştırma:
- *   npm install
- *   node server.js
- *   -> http://localhost:3000
- */
-
 const express = require('express');
-const { spawn } = require('child_process');
 const path = require('path');
+const botManager = require('./bot.js');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 6000;
 
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Aynı anda çok fazla test başlatılmasını önlemek için basit bir kilit
-let running = false;
+let logs = [];
 
-app.get('/api/test', (req, res) => {
-  const host = (req.query.host || '').trim();
-  const port = parseInt(req.query.port, 10) || 25565;
-  const username = (req.query.username || 'TestBot').trim();
+function addLog(msg) {
+  const timestamp = new Date().toLocaleTimeString();
+  const entry = `[${timestamp}] ${msg}`;
+  logs.unshift(entry);
+  if (logs.length > 50) logs.pop();
+}
 
-  if (!host) {
-    res.status(400).json({ error: 'host parametresi zorunlu' });
-    return;
-  }
-  if (running) {
-    res.status(429).json({ error: 'Şu anda başka bir test çalışıyor, lütfen bekleyin.' });
-    return;
-  }
-
-  // SSE başlıkları
-  res.set({
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive',
-  });
-  res.flushHeaders();
-
-  const send = (line) => res.write(`data: ${line}\n\n`);
-
-  running = true;
-  send(`Bağlanılıyor -> ${host}:${port} (kullanıcı: ${username})`);
-
-  const child = spawn('node', ['bot.js', host, String(port), username], {
-    cwd: __dirname,
-  });
-
-  child.stdout.on('data', (chunk) => {
-    chunk.toString().split('\n').filter(Boolean).forEach(send);
-  });
-
-  child.stderr.on('data', (chunk) => {
-    chunk.toString().split('\n').filter(Boolean).forEach((l) => send(`STDERR: ${l}`));
-  });
-
-  child.on('close', (code) => {
-    send(`[SON] İşlem çıkış kodu: ${code}`);
-    res.write('event: done\ndata: {}\n\n');
-    res.end();
-    running = false;
-  });
-
-  // İstemci bağlantıyı keserse alt işlemi de sonlandır
-  req.on('close', () => {
-    if (!child.killed) child.kill();
-    running = false;
-  });
+// API Endpoints
+app.get('/api/status', (req, res) => {
+  const status = botManager.getStatus();
+  res.json({ ...status, logs });
 });
 
-app.listen(PORT, () => {
-  console.log(`Panel çalışıyor: http://localhost:${PORT}`);
+app.post('/api/start', (req, res) => {
+  const { host, port, botCount } = req.body;
+  if (!host) {
+    return res.status(400).json({ error: 'Sunucu IP adresi gerekli!' });
+  }
+
+  logs = [];
+  botManager.startTest(host, port, botCount, addLog);
+  res.json({ success: true, message: 'Test başlatıldı.' });
+});
+
+app.post('/api/stop', (req, res) => {
+  botManager.stopTest();
+  addLog('[SİSTEM] Test durduruldu ve tüm botlar temizlendi.');
+  res.json({ success: true, message: 'Test durduruldu.' });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`[Dashboard] Dark Red Panel http://localhost:${PORT} adresinde aktif!`);
 });
