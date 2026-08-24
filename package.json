@@ -1,13 +1,12 @@
 {
-  "name": "join-bot",
+  "name": "mc-loadtest-dashboard",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "express": "^4.19.2",
+    "mineflayer": "^4.20.1"
+  }
 }
