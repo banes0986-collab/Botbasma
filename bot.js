@@ -1,75 +1,84 @@
-/**
- * Basit Minecraft Join/Test Botu
- * --------------------------------
- * Belirtilen sunucuya bağlanır, katılır ve bağlantı sonucunu (başarılı/hatalı)
- * konsola loglar. Sunucunun ayakta olup olmadığını ve gerçek bir oyuncu
- * girişini kabul edip etmediğini test etmek için kullanılır.
- *
- * Kullanım:
- *   node bot.js <sunucu_ip> <port> <kullanici_adi> [versiyon]
- *
- * Örnek:
- *   node bot.js play.crafthosting.com.tr 25565 TestBot
- *   node bot.js play.crafthosting.com.tr 25565 TestBot 1.20.4
- */
-
 const mineflayer = require('mineflayer');
 
-// --- Ayarlar (komut satırından veya doğrudan burada değiştirilebilir) ---
-const HOST = process.argv[2] || 'localhost';
-const PORT = parseInt(process.argv[3], 10) || 25565;
-const USERNAME = process.argv[4] || 'TestBot';
-const VERSION = process.argv[5]; // belirtilmezse mineflayer otomatik algılar
-
-console.log(`[TEST] Bağlanılıyor -> ${HOST}:${PORT} (kullanıcı: ${USERNAME})`);
-
-const bot = mineflayer.createBot({
-  host: HOST,
-  port: PORT,
-  username: USERNAME,   // offline-mode sunucularda herhangi bir isim yeterli
-  version: VERSION,     // undefined ise otomatik algılanır
-  auth: 'offline',      // sadece test/offline-mode sunucular için; online-mode
-                         // (Mojang hesaplı) sunucular için 'microsoft' + gerçek
-                         // hesap bilgisi gerekir
-});
-
-let joined = false;
-
-bot.on('login', () => {
-  console.log('[TEST] Login paketi alındı, sunucuya bağlanıldı.');
-});
-
-bot.on('spawn', () => {
-  joined = true;
-  console.log('[TEST] ✅ BAŞARILI: Bot dünyaya spawn oldu, sunucu çalışıyor.');
-  console.log(`[TEST] Pozisyon: ${JSON.stringify(bot.entity.position)}`);
-
-  // İsteğe bağlı: birkaç saniye bekleyip botu güvenli şekilde çıkar
-  setTimeout(() => {
-    console.log('[TEST] Test tamamlandı, bağlantı kapatılıyor.');
-    bot.quit();
-    process.exit(0);
-  }, 5000);
-});
-
-bot.on('kicked', (reason) => {
-  console.log('[TEST] ⚠️ Sunucu botu attı (kicked). Sebep:', reason);
-});
-
-bot.on('error', (err) => {
-  console.log('[TEST] ❌ HATA: Bağlantı kurulamadı ->', err.message);
-});
-
-bot.on('end', () => {
-  if (!joined) {
-    console.log('[TEST] ❌ BAŞARISIZ: Bot spawn olamadan bağlantı sona erdi.');
+class BotManager {
+  constructor() {
+    this.activeBots = [];
+    this.isRunning = false;
+    this.targetHost = '';
+    this.targetPort = 25565;
   }
-});
 
-// Genel zaman aşımı: 20 saniyede hiçbir şey olmazsa çık
-setTimeout(() => {
-  if (!joined) {
-    console.log('[TEST] ⏱️ Zaman aşımı: 20 saniyede spawn gerçekleşmedi.');
-    process.exit(1);
+  startTest(host, port, count, logCallback) {
+    this.stopTest(); // Önceki botları temizle
+    this.isRunning = true;
+    this.targetHost = host;
+    this.targetPort = parseInt(port) || 25565;
+    const botCount = parseInt(count) || 1;
+
+    logCallback(`[SİSTEM] ${botCount} bot ile test başlatılıyor -> ${host}:${port}`);
+
+    for (let i = 1; i <= botCount; i++) {
+      if (!this.isRunning) break;
+
+      setTimeout(() => {
+        if (!this.isRunning) return;
+
+        try {
+          const bot = mineflayer.createBot({
+            host: this.targetHost,
+            port: this.targetPort,
+            username: `CraftTest_${Math.floor(Math.random() * 8999 + 1000)}`,
+            hideErrors: true
+          });
+
+          bot.on('login', () => {
+            logCallback(`[+] ${bot.username} sunucuya giriş yaptı.`);
+          });
+
+          bot.on('kicked', (reason) => {
+            logCallback(`[-] ${bot.username} atıldı: ${reason}`);
+            this.removeBot(bot);
+          });
+
+          bot.on('error', (err) => {
+            logCallback(`[!] ${bot.username} hatası: ${err.message}`);
+            this.removeBot(bot);
+          });
+
+          bot.on('end', () => {
+            this.removeBot(bot);
+          });
+
+          this.activeBots.push(bot);
+        } catch (e) {
+          logCallback(`[!] Bot ${i} oluşturulamadı: ${e.message}`);
+        }
+      }, i * 800); // Sunucu korumasına takılmamak için kademeli giriş
+    }
   }
-}, 20000);
+
+  stopTest() {
+    this.isRunning = false;
+    this.activeBots.forEach((bot) => {
+      try {
+        bot.quit();
+      } catch (e) {}
+    });
+    this.activeBots = [];
+  }
+
+  removeBot(botInstance) {
+    this.activeBots = this.activeBots.filter((b) => b !== botInstance);
+  }
+
+  getStatus() {
+    return {
+      running: this.isRunning,
+      activeBotCount: this.activeBots.length,
+      targetHost: this.targetHost,
+      targetPort: this.targetPort
+    };
+  }
+}
+
+module.exports = new BotManager();
